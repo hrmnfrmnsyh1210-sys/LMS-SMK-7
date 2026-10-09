@@ -25,7 +25,7 @@ class LoginTest extends TestCase
 
     public static function daftarRole(): array
     {
-        return [['operator'], ['kepsek'], ['guru'], ['siswa']];
+        return [['operator'], ['kepsek'], ['guru'], ['siswa'], ['ortu']];
     }
 
     #[DataProvider('daftarRole')]

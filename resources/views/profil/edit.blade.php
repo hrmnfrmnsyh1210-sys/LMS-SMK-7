@@ -25,6 +25,17 @@
                     <div class="text-slate-500">NIP</div>
                     <div class="font-medium">{{ $profil->nip ?: '-' }}</div>
                 </div>
+            @elseif ($user->role === 'ortu')
+                <div>
+                    <div class="text-slate-500">Anak yang dipantau</div>
+                    <ul class="font-medium">
+                        @forelse ($profil->anak as $a)
+                            <li>{{ $a->nama }} <span class="text-xs font-normal text-slate-500">({{ $a->kelasPada()?->nama_kelas ?? '-' }})</span></li>
+                        @empty
+                            <li class="font-normal text-slate-500">Belum terhubung, hubungi operator.</li>
+                        @endforelse
+                    </ul>
+                </div>
             @endif
             <div>
                 <div class="text-slate-500">Login terakhir</div>
@@ -58,7 +69,7 @@
                 <x-field.select name="jenis_kelamin" label="Jenis kelamin" :options="['L' => 'Laki-laki', 'P' => 'Perempuan']" :value="$profil?->jenis_kelamin" required />
             @endif
 
-            @if (in_array($user->role, ['guru', 'siswa']))
+            @if (in_array($user->role, ['guru', 'siswa', 'ortu']))
                 <x-field.textarea name="alamat" label="Alamat" :value="$profil?->alamat" />
             @endif
 

@@ -7,9 +7,85 @@
 @source '../../app/**/*.php';
 @source '../../config/menu.php';
 
+/*
+ * Palet soft: skala warna utama diredam agar tidak terlalu mencolok.
+ * Semua utilitas Tailwind (bg-blue-600, text-red-500, dst.) otomatis ikut.
+ */
 @theme {
     --font-sans: 'Poppins', 'Inter', ui-sans-serif, system-ui, sans-serif;
-    --color-latar: #f4f7fc;
+    --color-latar: #f6f8fc;
+    --gradasi-sidebar: linear-gradient(to bottom, #5f78c2, #7591d6 55%, #93aee6);
+
+    --color-blue-50: #f3f6fd;
+    --color-blue-100: #e6edfa;
+    --color-blue-200: #d0dcf4;
+    --color-blue-300: #b0c4ec;
+    --color-blue-400: #8ea8e0;
+    --color-blue-500: #7290d6;
+    --color-blue-600: #5b78c6;
+    --color-blue-700: #4d66ad;
+    --color-blue-800: #42568d;
+    --color-blue-900: #3a4a72;
+
+    --color-red-50: #fdf4f4;
+    --color-red-100: #fbe6e6;
+    --color-red-200: #f5cccc;
+    --color-red-400: #e59a9a;
+    --color-red-500: #da7f7f;
+    --color-red-600: #c96666;
+    --color-red-700: #ad5454;
+
+    --color-emerald-50: #f1faf6;
+    --color-emerald-100: #dff3ea;
+    --color-emerald-200: #c0e6d5;
+    --color-emerald-500: #5fb795;
+    --color-emerald-600: #4a9e7e;
+    --color-emerald-700: #3d8468;
+
+    --color-pink-50: #fdf4f9;
+    --color-pink-100: #fbe7f1;
+    --color-pink-200: #f6cfe3;
+    --color-pink-300: #f0b4d3;
+    --color-pink-400: #e89cc2;
+    --color-pink-500: #dc84b0;
+    --color-pink-600: #c96d9c;
+}
+
+/*
+ * Tema siswa: lavender–pink pastel yang lebih "Gen Z".
+ * Skala blue ditimpa sehingga semua komponen bersama ikut berganti warna.
+ */
+[data-tema='siswa'] {
+    --color-latar: #faf7ff;
+    --gradasi-sidebar: linear-gradient(160deg, #8f7be0, #b18ef0 50%, #eaa2cf);
+
+    --color-blue-50: #f7f3ff;
+    --color-blue-100: #eee7fd;
+    --color-blue-200: #ddd0fa;
+    --color-blue-300: #c7b4f5;
+    --color-blue-400: #ad94ee;
+    --color-blue-500: #9679e3;
+    --color-blue-600: #8165d4;
+    --color-blue-700: #6c52b8;
+    --color-blue-800: #594496;
+    --color-blue-900: #493a78;
+}
+
+/* Tema orang tua: teal lembut yang tenang. */
+[data-tema='ortu'] {
+    --color-latar: #f4f9f8;
+    --gradasi-sidebar: linear-gradient(to bottom, #4f9a92, #6db8b0 55%, #95cfc8);
+
+    --color-blue-50: #f0f8f7;
+    --color-blue-100: #dcf0ed;
+    --color-blue-200: #bde2dd;
+    --color-blue-300: #95cfc8;
+    --color-blue-400: #6fb9b0;
+    --color-blue-500: #55a199;
+    --color-blue-600: #458a83;
+    --color-blue-700: #3a726c;
+    --color-blue-800: #335c58;
+    --color-blue-900: #2d4c49;
 }
 
 [x-cloak] {
@@ -43,7 +119,23 @@
 
 @layer components {
     .card {
-        @apply min-w-0 rounded-2xl border border-slate-100 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06)];
+        @apply min-w-0 rounded-2xl border border-slate-100 bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)];
+    }
+
+    [data-tema='siswa'] .card {
+        @apply rounded-3xl border-blue-100/70 shadow-[0_6px_24px_rgba(129,101,212,0.07)];
+    }
+
+    [data-tema='siswa'] .btn-primary {
+        @apply rounded-full bg-linear-to-r from-blue-500 to-pink-400 shadow-md shadow-blue-500/25 hover:from-blue-600 hover:to-pink-500;
+    }
+
+    [data-tema='siswa'] .btn-secondary {
+        @apply rounded-full;
+    }
+
+    .bg-sidebar {
+        background-image: var(--gradasi-sidebar);
     }
 
     .card-body {

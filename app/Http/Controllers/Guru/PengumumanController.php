@@ -38,8 +38,11 @@ class PengumumanController extends Controller
         ]);
         $pengumuman->load('kelas');
 
-        $siswa = User::whereHas('siswa.kelasSiswa', fn ($q) => $q->where('kelas_id', $pengumuman->kelas_id))->get();
-        Notification::send($siswa, new Pemberitahuan("Pengumuman {$pengumuman->kelas->nama_kelas}: {$pengumuman->judul}"));
+        // Siswa di kelas tujuan beserta orang tuanya.
+        $penerima = User::whereHas('siswa.kelasSiswa', fn ($q) => $q->where('kelas_id', $pengumuman->kelas_id))
+            ->orWhereHas('ortu.anak.kelasSiswa', fn ($q) => $q->where('kelas_id', $pengumuman->kelas_id))
+            ->get();
+        Notification::send($penerima, new Pemberitahuan("Pengumuman {$pengumuman->kelas->nama_kelas}: {$pengumuman->judul}"));
 
         ActivityLogger::log('tambah_pengumuman', "Pengumuman \"{$pengumuman->judul}\" untuk {$pengumuman->kelas->nama_kelas}");
 

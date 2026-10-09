@@ -14,6 +14,9 @@ class Tugas extends Model
 
     protected $table = 'tugas';
 
+    /** Status tugas dari sisi siswa (lihat statusSiswa()). */
+    public const STATUS_SISWA = ['belum' => 'Belum dikumpulkan', 'dikumpulkan' => 'Dikumpulkan', 'dinilai' => 'Dinilai', 'terlewat' => 'Terlewat'];
+
     protected $fillable = ['pengampu_id', 'judul', 'deskripsi', 'file_path', 'deadline', 'nilai_maks'];
 
     protected function casts(): array
@@ -34,5 +37,16 @@ class Tugas extends Model
     public function sudahLewatDeadline(): bool
     {
         return now()->gt($this->deadline);
+    }
+
+    /** Status tugas dari sisi siswa: 'dinilai' | 'dikumpulkan' | 'terlewat' | 'belum'. */
+    public function statusSiswa(?PengumpulanTugas $pengumpulan): string
+    {
+        return match (true) {
+            $pengumpulan?->nilai !== null => 'dinilai',
+            $pengumpulan !== null => 'dikumpulkan',
+            $this->sudahLewatDeadline() => 'terlewat',
+            default => 'belum',
+        };
     }
 }

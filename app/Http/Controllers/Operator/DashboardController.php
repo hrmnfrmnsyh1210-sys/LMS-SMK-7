@@ -17,7 +17,7 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     /** Warna irisan grafik donat komposisi jurusan. */
-    private const WARNA_JURUSAN = ['#2563eb', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+    private const WARNA_JURUSAN = ['#7f9ce0', '#7cc9a5', '#f2c27b', '#ee9a9a', '#b29ced', '#7fcbdc', '#eba3c8'];
 
     public function __invoke(): View
     {

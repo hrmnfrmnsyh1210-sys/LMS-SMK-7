@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Guru;
+use App\Models\Kelas;
 use App\Models\Kepsek;
+use App\Models\OrangTua;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Support\Arr;
@@ -11,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Membuat/mengubah akun beserta profilnya dalam satu transaksi.
- * Password default akun baru = NIS (siswa) / NIP (guru & kepsek) / username.
+ * Password default akun baru = NIS (siswa) / NIP (guru & kepsek) / username (operator & orang tua).
  */
 class AkunService
 {
@@ -47,8 +49,44 @@ class AkunService
         });
     }
 
+    /** Akun orang tua beserta anak yang dipantau (siswa_ids). */
+    public function buatOrtu(array $data): OrangTua
+    {
+        return DB::transaction(function () use ($data) {
+            $user = $this->buatUser('ortu', $data['username'], $data);
+            $ortu = $user->ortu()->create(Arr::only($data, ['nama', 'hubungan', 'no_hp', 'alamat']));
+            $ortu->anak()->sync($data['siswa_ids'] ?? []);
+
+            return $ortu;
+        });
+    }
+
+    /**
+     * Buat akun orang tua untuk siswa aktif di kelas yang belum punya akun orang tua.
+     * Username "ortu{NIS}", nama dari kolom nama_ortu siswa.
+     *
+     * @return int jumlah akun yang dibuat
+     */
+    public function buatOrtuMassal(Kelas $kelas): int
+    {
+        $siswa = $kelas->siswa()
+            ->where('siswa.status', 'aktif')
+            ->whereDoesntHave('orangTua')
+            ->get()
+            ->reject(fn (Siswa $s) => User::where('username', 'ortu'.$s->nis)->exists());
+
+        $siswa->each(fn (Siswa $s) => $this->buatOrtu([
+            'username' => 'ortu'.$s->nis,
+            'nama' => $s->nama_ortu ?: 'Orang Tua '.$s->nama,
+            'hubungan' => 'wali',
+            'siswa_ids' => [$s->id],
+        ]));
+
+        return $siswa->count();
+    }
+
     /** Ubah data user + profil. */
-    public function perbarui(Guru|Siswa|Kepsek $profil, array $data, array $fieldProfil): void
+    public function perbarui(Guru|Siswa|Kepsek|OrangTua $profil, array $data, array $fieldProfil): void
     {
         DB::transaction(function () use ($profil, $data, $fieldProfil) {
             $profil->user->update(Arr::only($data, self::FIELD_USER));

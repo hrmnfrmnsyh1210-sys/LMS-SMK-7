@@ -14,7 +14,7 @@
 <body class="min-h-screen bg-latar font-sans text-slate-800 antialiased">
     <div class="grid min-h-screen lg:grid-cols-2">
         {{-- Panel biru (desktop) --}}
-        <div class="relative hidden flex-col justify-between overflow-hidden bg-linear-to-br from-blue-700 via-blue-600 to-blue-500 p-12 text-white lg:flex">
+        <div class="relative hidden flex-col justify-between overflow-hidden bg-sidebar p-12 text-white lg:flex">
             <div class="flex items-center gap-3">
                 @if ($sekolah['logo'])
                     <img src="{{ file_url($sekolah['logo']) }}" alt="Logo" class="h-12 w-12 rounded-xl bg-white object-contain p-1">

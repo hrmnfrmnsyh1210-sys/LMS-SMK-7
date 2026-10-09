@@ -4,8 +4,11 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Guru;
+use App\Http\Controllers\Kepsek;
 use App\Http\Controllers\Operator;
+use App\Http\Controllers\Ortu;
 use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\Siswa;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
@@ -38,6 +41,8 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::resource('guru', Operator\GuruController::class)->except('show')->parameters(['guru' => 'guru']);
             Route::resource('siswa', Operator\SiswaController::class)->except('show')->parameters(['siswa' => 'siswa']);
             Route::resource('kepsek', Operator\KepsekController::class)->except('show')->parameters(['kepsek' => 'kepsek']);
+            Route::post('orang-tua/massal', [Operator\OrangTuaController::class, 'massal'])->name('orang-tua.massal');
+            Route::resource('orang-tua', Operator\OrangTuaController::class)->except('show')->parameters(['orang-tua' => 'orangTua']);
             Route::post('akun/{user}/reset-password', [Operator\AkunController::class, 'resetPassword'])->name('akun.reset-password');
             Route::patch('akun/{user}/status', [Operator\AkunController::class, 'toggleStatus'])->name('akun.status');
 
@@ -80,9 +85,16 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::post('backup/restore', [Operator\BackupController::class, 'restore'])->name('backup.restore');
         });
 
-        // ========== KEPSEK / GURU / SISWA (dilengkapi pada fase 2 & 3) ==========
+        // ===================== KEPALA SEKOLAH =====================
         Route::prefix('kepsek')->name('kepsek.')->middleware('role:kepsek')->group(function () {
-            Route::get('/', [DashboardController::class, 'role'])->name('dashboard');
+            Route::get('/', Kepsek\DashboardController::class)->name('dashboard');
+            Route::get('monitoring/guru', [Kepsek\MonitoringController::class, 'guru'])->name('monitoring.guru');
+            Route::get('monitoring/kelas', [Kepsek\MonitoringController::class, 'kelas'])->name('monitoring.kelas');
+            Route::get('monitoring/kelas/{kelas}', [Kepsek\MonitoringController::class, 'kelasShow'])->name('monitoring.kelas.show');
+
+            Route::get('pengumuman', [Kepsek\PengumumanController::class, 'index'])->name('pengumuman.index');
+            Route::post('pengumuman', [Kepsek\PengumumanController::class, 'store'])->name('pengumuman.store');
+            Route::delete('pengumuman/{pengumuman}', [Kepsek\PengumumanController::class, 'destroy'])->name('pengumuman.destroy');
         });
 
         // ======================= GURU =======================
@@ -140,8 +152,60 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             });
         });
 
+        // ===================== ORANG TUA =====================
+        Route::prefix('ortu')->name('ortu.')->middleware('role:ortu')->group(function () {
+            Route::get('/', Ortu\DashboardController::class)->name('dashboard');
+            Route::post('anak/{siswa}/pilih', [Ortu\DashboardController::class, 'pilihAnak'])->name('anak.pilih');
+            Route::get('nilai', [Ortu\AnakController::class, 'nilai'])->name('nilai');
+            Route::get('presensi', [Ortu\AnakController::class, 'presensi'])->name('presensi');
+            Route::get('tugas', [Ortu\AnakController::class, 'tugas'])->name('tugas');
+            Route::get('kuis', [Ortu\AnakController::class, 'kuis'])->name('kuis');
+            Route::get('jadwal', [Ortu\AnakController::class, 'jadwal'])->name('jadwal');
+            Route::get('pengumuman', [Ortu\AnakController::class, 'pengumuman'])->name('pengumuman');
+
+            Route::get('surat-izin', [Ortu\SuratIzinController::class, 'index'])->name('surat-izin.index');
+            Route::post('surat-izin', [Ortu\SuratIzinController::class, 'store'])->name('surat-izin.store');
+            Route::delete('surat-izin/{suratIzin}', [Ortu\SuratIzinController::class, 'destroy'])->name('surat-izin.destroy');
+        });
+
+        // ======================= SISWA =======================
         Route::prefix('siswa')->name('siswa.')->middleware('role:siswa')->group(function () {
-            Route::get('/', [DashboardController::class, 'role'])->name('dashboard');
+            Route::get('/', Siswa\DashboardController::class)->name('dashboard');
+            Route::get('mapel', [Siswa\MapelController::class, 'index'])->name('mapel.index');
+            Route::get('tugas', [Siswa\TugasController::class, 'index'])->name('tugas.index');
+            Route::get('kuis', [Siswa\KuisController::class, 'index'])->name('kuis.index');
+            Route::get('jadwal', [Siswa\AkademikController::class, 'jadwal'])->name('jadwal');
+            Route::get('presensi', [Siswa\AkademikController::class, 'presensi'])->name('presensi');
+            Route::get('nilai', [Siswa\AkademikController::class, 'nilai'])->name('nilai');
+            Route::get('pengumuman', [Siswa\AkademikController::class, 'pengumuman'])->name('pengumuman');
+
+            Route::get('surat-izin', [Siswa\SuratIzinController::class, 'index'])->name('surat-izin.index');
+            Route::post('surat-izin', [Siswa\SuratIzinController::class, 'store'])->name('surat-izin.store');
+            Route::delete('surat-izin/{suratIzin}', [Siswa\SuratIzinController::class, 'destroy'])->name('surat-izin.destroy');
+
+            // Pembelajaran per mapel — hanya mapel di kelas siswa (policy) & data anak harus milik pengampu (scoped).
+            Route::prefix('mapel/{pengampu}')->middleware('can:ikuti,pengampu')->scopeBindings()->group(function () {
+                Route::get('/', [Siswa\MapelController::class, 'show'])->name('mapel.show');
+
+                Route::get('tugas', [Siswa\TugasController::class, 'mapel'])->name('tugas.mapel');
+                Route::get('tugas/{tugas}', [Siswa\TugasController::class, 'show'])->name('tugas.show');
+                Route::post('tugas/{tugas}', [Siswa\TugasController::class, 'kumpul'])->name('tugas.kumpul');
+
+                Route::get('kuis', [Siswa\KuisController::class, 'mapel'])->name('kuis.mapel');
+                Route::get('kuis/{kuis}', [Siswa\KuisController::class, 'show'])->name('kuis.show');
+                Route::post('kuis/{kuis}/mulai', [Siswa\KuisController::class, 'mulai'])->name('kuis.mulai');
+                Route::get('kuis/{kuis}/kerjakan', [Siswa\KuisController::class, 'kerjakan'])->name('kuis.kerjakan');
+                Route::post('kuis/{kuis}/jawab', [Siswa\KuisController::class, 'jawab'])->name('kuis.jawab');
+                Route::post('kuis/{kuis}/pindah-tab', [Siswa\KuisController::class, 'pindahTab'])->name('kuis.pindah-tab');
+                Route::post('kuis/{kuis}/submit', [Siswa\KuisController::class, 'submit'])->name('kuis.submit');
+
+                Route::get('forum', [Siswa\ForumController::class, 'index'])->name('forum.index');
+                Route::post('forum', [Siswa\ForumController::class, 'store'])->name('forum.store');
+                Route::get('forum/{topik}', [Siswa\ForumController::class, 'show'])->name('forum.show');
+                Route::post('forum/{topik}/balas', [Siswa\ForumController::class, 'balas'])->name('forum.balas');
+                Route::delete('forum/{topik}', [Siswa\ForumController::class, 'destroy'])->name('forum.destroy');
+                Route::delete('forum/{topik}/balasan/{balasan}', [Siswa\ForumController::class, 'hapusBalasan'])->name('forum.balasan.destroy');
+            });
         });
     });
 });

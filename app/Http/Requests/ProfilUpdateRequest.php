@@ -40,6 +40,10 @@ class ProfilUpdateRequest extends FormRequest
                 'alamat' => ['nullable', 'string', 'max:500'],
                 'nama_ortu' => ['nullable', 'string', 'max:255'],
             ],
+            'ortu' => [
+                'no_hp' => ['nullable', 'string', 'max:20'],
+                'alamat' => ['nullable', 'string', 'max:500'],
+            ],
             default => [],
         };
     }

@@ -11,6 +11,7 @@
     $keteranganUser = match ($user->role) {
         'siswa' => trim('NIS '.$profil?->nis.' · '.($profil?->kelasPada()?->nama_kelas ?? '')),
         'guru' => $profil?->nip ? 'NIP '.$profil->nip : 'Guru',
+        'ortu' => $profil?->anak->isNotEmpty() ? 'Orang tua '.$profil->anak->pluck('nama')->map(fn ($n) => \Illuminate\Support\Str::of($n)->explode(' ')->first())->join(', ') : 'Orang Tua',
         default => $user->label_role,
     };
     $inisial = \Illuminate\Support\Str::of($user->nama)->explode(' ')->filter()->take(2)->map(fn ($k) => mb_strtoupper(mb_substr($k, 0, 1)))->implode('');
@@ -33,15 +34,15 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-<body class="bg-latar font-sans text-slate-800 antialiased"
+<body class="bg-latar font-sans text-slate-800 antialiased" data-tema="{{ $user->role }}"
       x-data="{ sidebar: false, ciut: localStorage.getItem('sidebar-ciut') === '1' }"
       x-init="$watch('ciut', v => localStorage.setItem('sidebar-ciut', v ? '1' : '0'))">
 
     {{-- Overlay drawer (HP) --}}
-    <div x-show="sidebar" x-cloak x-transition.opacity class="fixed inset-0 z-30 bg-slate-900/50 lg:hidden" @click="sidebar = false"></div>
+    <div x-show="sidebar" x-cloak x-transition.opacity class="fixed inset-0 z-30 bg-slate-900/30 backdrop-blur-sm lg:hidden" @click="sidebar = false"></div>
 
     {{-- ================= SIDEBAR ================= --}}
-    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-linear-to-b lg:translate-x-0 from-blue-700 via-blue-600 to-blue-500 transition-transform duration-200"
+    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-sidebar lg:translate-x-0 transition-transform duration-200"
            :class="{ 'translate-x-0': sidebar, 'lg:-translate-x-full!': ciut }">
         {{-- Identitas sekolah --}}
         <a href="{{ route('dashboard') }}" class="flex flex-col items-center px-5 pt-7 pb-6 text-center text-white">
@@ -65,7 +66,8 @@
                         <a href="{{ route($item['route']) }}"
                            @class([
                                'flex items-center gap-3 rounded-xl px-3.5 py-2.5 font-medium transition',
-                               'bg-blue-600 text-white shadow-md shadow-blue-600/30' => $aktif,
+                               'bg-blue-600 text-white shadow-md shadow-blue-600/25' => $aktif && $user->role !== 'siswa',
+                               'bg-linear-to-r from-blue-500 to-pink-400 text-white shadow-md shadow-blue-500/25' => $aktif && $user->role === 'siswa',
                                'text-slate-600 hover:bg-blue-50 hover:text-blue-700' => ! $aktif,
                            ])>
                             <x-icon :name="$item['ikon']" class="h-5 w-5 shrink-0" />
@@ -121,7 +123,11 @@
                     <div x-show="buka" x-cloak x-transition class="absolute right-0 mt-2 w-80 rounded-2xl border border-slate-100 bg-white p-2 shadow-xl">
                         <div class="px-3 py-2 text-sm font-semibold">Notifikasi</div>
                         @forelse ($notifikasi as $notif)
-                            <div class="rounded-lg px-3 py-2 text-sm hover:bg-slate-50">{{ $notif->data['pesan'] ?? 'Notifikasi baru' }}</div>
+                            @if (! empty($notif->data['url']))
+                                <a href="{{ $notif->data['url'] }}" class="block rounded-lg px-3 py-2 text-sm hover:bg-slate-50">{{ $notif->data['pesan'] ?? 'Notifikasi baru' }}</a>
+                            @else
+                                <div class="rounded-lg px-3 py-2 text-sm hover:bg-slate-50">{{ $notif->data['pesan'] ?? 'Notifikasi baru' }}</div>
+                            @endif
                         @empty
                             <div class="px-3 py-6 text-center text-sm text-slate-500">Tidak ada notifikasi baru.</div>
                         @endforelse

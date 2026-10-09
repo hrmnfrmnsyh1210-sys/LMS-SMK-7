@@ -13,7 +13,7 @@ class SuratIzin extends Model
     protected $table = 'surat_izin';
 
     protected $fillable = [
-        'siswa_id', 'kelas_id', 'tanggal_mulai', 'tanggal_selesai', 'jenis', 'keterangan', 'file_path',
+        'siswa_id', 'kelas_id', 'pengaju_user_id', 'tanggal_mulai', 'tanggal_selesai', 'jenis', 'keterangan', 'file_path',
         'status', 'diproses_oleh', 'catatan',
     ];
 
@@ -30,6 +30,12 @@ class SuratIzin extends Model
     public function kelas(): BelongsTo
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    /** User yang mengajukan: siswa sendiri atau orang tuanya. */
+    public function pengaju(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pengaju_user_id');
     }
 
     public function pemroses(): BelongsTo

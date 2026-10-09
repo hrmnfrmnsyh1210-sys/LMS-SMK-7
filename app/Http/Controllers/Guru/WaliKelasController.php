@@ -5,11 +5,9 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Guru\ProsesSuratIzinRequest;
 use App\Models\Kelas;
-use App\Models\Nilai;
-use App\Models\Presensi;
 use App\Models\SuratIzin;
 use App\Services\ActivityLogger;
-use App\Services\RankingService;
+use App\Services\RekapKelasService;
 use App\Services\SuratIzinService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,29 +17,9 @@ use Illuminate\View\View;
 class WaliKelasController extends Controller
 {
     /** Rekap nilai semua mapel, kehadiran, dan ranking kelas wali. */
-    public function rekap(Request $request, RankingService $ranking): View
+    public function rekap(Request $request, RekapKelasService $rekap): View
     {
-        $kelas = $this->kelasWali($request);
-        $kelas->load(['pengampu.mapel', 'pengampu.guru', 'jurusan']);
-
-        $pengampu = $kelas->pengampu->sortBy('mapel.nama_mapel')->values();
-        $nilai = Nilai::whereIn('pengampu_id', $pengampu->pluck('id'))->get()->groupBy('siswa_id');
-
-        $kehadiran = Presensi::whereIn('pengampu_id', $pengampu->pluck('id'))
-            ->selectRaw('siswa_id, status, COUNT(*) as jumlah')
-            ->groupBy('siswa_id', 'status')
-            ->get()
-            ->groupBy('siswa_id')
-            ->map(fn ($baris) => $baris->pluck('jumlah', 'status'));
-
-        return view('guru.wali.rekap', [
-            'kelas' => $kelas,
-            'pengampu' => $pengampu,
-            'ranking' => $ranking->kelas($kelas),
-            'nilai' => $nilai,
-            'kehadiran' => $kehadiran,
-            'kkm' => (float) pengaturan('kkm', 75),
-        ]);
+        return view('guru.wali.rekap', $rekap->rekap($this->kelasWali($request)));
     }
 
     public function suratIzin(Request $request): View
@@ -49,7 +27,7 @@ class WaliKelasController extends Controller
         $kelas = $this->kelasWali($request);
         $status = $request->input('status', 'menunggu');
 
-        $surat = SuratIzin::with(['siswa', 'pemroses'])
+        $surat = SuratIzin::with(['siswa', 'pemroses', 'pengaju.ortu'])
             ->where('kelas_id', $kelas->id)
             ->when(in_array($status, ['menunggu', 'disetujui', 'ditolak'], true), fn ($q) => $q->where('status', $status))
             ->latest()

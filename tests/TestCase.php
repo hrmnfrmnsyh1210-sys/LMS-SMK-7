@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\Models\Guru;
 use App\Models\Kepsek;
+use App\Models\OrangTua;
 use App\Models\Pengaturan;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
@@ -35,6 +36,7 @@ abstract class TestCase extends BaseTestCase
             'kepsek' => Kepsek::factory()->create()->user,
             'guru' => Guru::factory()->create()->user,
             'siswa' => Siswa::factory()->create()->user,
+            'ortu' => OrangTua::factory()->create()->user,
         };
     }
 }

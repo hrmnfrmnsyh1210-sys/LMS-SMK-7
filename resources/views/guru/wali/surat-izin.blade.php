@@ -26,12 +26,17 @@
                         </div>
                         <p class="text-sm whitespace-pre-line text-slate-700">{{ $s->keterangan }}</p>
                         @if ($s->file_path)
-                            <a href="{{ file_url($s->file_path) }}" target="_blank" class="link text-sm">📎 Lihat bukti</a>
+                            <a href="{{ file_url($s->file_path) }}" target="_blank" class="link inline-flex items-center gap-1 text-sm"><x-icon name="document" class="h-4 w-4" /> Lihat bukti</a>
                         @endif
                         @if ($s->status !== 'menunggu')
                             <p class="text-xs text-slate-400">Diproses {{ $s->pemroses?->nama }}{{ $s->catatan ? ' · Catatan: '.$s->catatan : '' }}</p>
                         @endif
-                        <p class="text-xs text-slate-400">Diajukan {{ tanggal_indo($s->created_at, false, true) }}</p>
+                        <p class="text-xs text-slate-400">
+                            Diajukan {{ tanggal_indo($s->created_at, false, true) }}
+                            @if ($s->pengaju?->role === 'ortu')
+                                oleh orang tua: <span class="font-medium text-slate-600">{{ $s->pengaju->nama }}</span>{{ $s->pengaju->ortu?->no_hp ? ' ('.$s->pengaju->ortu->no_hp.')' : '' }}
+                            @endif
+                        </p>
                     </div>
 
                     @if ($s->status === 'menunggu')

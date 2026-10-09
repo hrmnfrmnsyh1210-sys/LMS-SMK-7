@@ -13,6 +13,7 @@ return [
         ['label' => 'Guru', 'route' => 'operator.guru.index', 'aktif' => 'operator.guru.*', 'ikon' => 'user-group'],
         ['label' => 'Siswa', 'route' => 'operator.siswa.index', 'aktif' => 'operator.siswa.*', 'ikon' => 'academic-cap'],
         ['label' => 'Kepala Sekolah', 'route' => 'operator.kepsek.index', 'aktif' => 'operator.kepsek.*', 'ikon' => 'user'],
+        ['label' => 'Orang Tua', 'route' => 'operator.orang-tua.index', 'aktif' => 'operator.orang-tua.*', 'ikon' => 'heart'],
         ['label' => 'Import Excel', 'route' => 'operator.import.index', 'aktif' => 'operator.import.*', 'ikon' => 'upload'],
 
         ['judul' => 'Data Master'],
@@ -37,6 +38,13 @@ return [
 
     'kepsek' => [
         ['label' => 'Dashboard', 'route' => 'kepsek.dashboard', 'ikon' => 'home'],
+
+        ['judul' => 'Monitoring'],
+        ['label' => 'Keaktifan Guru', 'route' => 'kepsek.monitoring.guru', 'ikon' => 'user-group'],
+        ['label' => 'Rekap Kelas', 'route' => 'kepsek.monitoring.kelas', 'aktif' => 'kepsek.monitoring.kelas*', 'ikon' => 'chart'],
+        ['label' => 'Pengumuman', 'route' => 'kepsek.pengumuman.index', 'aktif' => 'kepsek.pengumuman.*', 'ikon' => 'megaphone'],
+
+        ['judul' => 'Akun'],
         ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
     ],
 
@@ -56,6 +64,39 @@ return [
 
     'siswa' => [
         ['label' => 'Dashboard', 'route' => 'siswa.dashboard', 'ikon' => 'home'],
+
+        ['judul' => 'Belajar'],
+        ['label' => 'Mata Pelajaran', 'route' => 'siswa.mapel.index', 'aktif' => ['siswa.mapel.*', 'siswa.forum.*'], 'ikon' => 'book'],
+        ['label' => 'Tugas', 'route' => 'siswa.tugas.index', 'aktif' => 'siswa.tugas.*', 'ikon' => 'clipboard-check'],
+        ['label' => 'Kuis & Ujian', 'route' => 'siswa.kuis.index', 'aktif' => 'siswa.kuis.*', 'ikon' => 'puzzle'],
+        ['label' => 'Jadwal', 'route' => 'siswa.jadwal', 'ikon' => 'clock'],
+
+        ['judul' => 'Progres'],
+        ['label' => 'Nilai', 'route' => 'siswa.nilai', 'ikon' => 'chart'],
+        ['label' => 'Presensi', 'route' => 'siswa.presensi', 'ikon' => 'check-badge'],
+        ['label' => 'Surat Izin', 'route' => 'siswa.surat-izin.index', 'aktif' => 'siswa.surat-izin.*', 'ikon' => 'document'],
+        ['label' => 'Pengumuman', 'route' => 'siswa.pengumuman', 'ikon' => 'megaphone'],
+
+        ['judul' => 'Akun'],
+        ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
+    ],
+
+    // Halaman pantauan menampilkan anak yang sedang dipilih (lihat Ortu\Concerns\AnakDipantau).
+    'ortu' => [
+        ['label' => 'Dashboard', 'route' => 'ortu.dashboard', 'ikon' => 'home'],
+
+        ['judul' => 'Pantau Anak'],
+        ['label' => 'Nilai', 'route' => 'ortu.nilai', 'ikon' => 'chart'],
+        ['label' => 'Presensi', 'route' => 'ortu.presensi', 'ikon' => 'check-badge'],
+        ['label' => 'Tugas', 'route' => 'ortu.tugas', 'ikon' => 'clipboard-check'],
+        ['label' => 'Kuis & Ujian', 'route' => 'ortu.kuis', 'ikon' => 'puzzle'],
+        ['label' => 'Jadwal', 'route' => 'ortu.jadwal', 'ikon' => 'clock'],
+
+        ['judul' => 'Komunikasi'],
+        ['label' => 'Surat Izin', 'route' => 'ortu.surat-izin.index', 'aktif' => 'ortu.surat-izin.*', 'ikon' => 'document'],
+        ['label' => 'Pengumuman', 'route' => 'ortu.pengumuman', 'ikon' => 'megaphone'],
+
+        ['judul' => 'Akun'],
         ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
     ],
 ];

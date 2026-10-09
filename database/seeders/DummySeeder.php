@@ -9,6 +9,7 @@ use App\Models\Kelas;
 use App\Models\KelasSiswa;
 use App\Models\Kepsek;
 use App\Models\Mapel;
+use App\Models\OrangTua;
 use App\Models\Pengampu;
 use App\Models\Pengaturan;
 use App\Models\Siswa;
@@ -18,7 +19,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Data dummy realistis: 1 tahun ajaran aktif, 3 jurusan, 6 kelas,
- * 10 mapel, 8 guru, 60 siswa, plotting pengampu & jadwal tanpa bentrok.
+ * 10 mapel, 8 guru, 60 siswa, 10 orang tua, plotting pengampu & jadwal tanpa bentrok.
  * Semua akun dummy berpassword "password".
  */
 class DummySeeder extends Seeder
@@ -108,6 +109,7 @@ class DummySeeder extends Seeder
 
         // 60 siswa (10 per kelas), NIS 26001 s.d. 26060
         $nomor = 1;
+        $semuaSiswa = collect();
         foreach ($kelas as $k) {
             for ($i = 0; $i < 10; $i++, $nomor++) {
                 $nis = (string) (26000 + $nomor);
@@ -116,8 +118,20 @@ class DummySeeder extends Seeder
                     'nisn' => '00'.str_pad((string) (91000000 + $nomor), 8, '0', STR_PAD_LEFT),
                 ]);
                 KelasSiswa::create(['kelas_id' => $k->id, 'siswa_id' => $siswa->id, 'tahun_ajaran_id' => $tahun->id]);
+                $semuaSiswa->push($siswa);
             }
         }
+
+        // Orang tua untuk 10 siswa X RPL 1 (username ortu + NIS); ortu26001 juga memantau adiknya NIS 26011.
+        foreach ($semuaSiswa->take(10) as $siswa) {
+            $ortu = OrangTua::factory()->create([
+                'user_id' => User::factory()->create(['username' => 'ortu'.$siswa->nis, 'role' => 'ortu'])->id,
+                'nama' => $siswa->nama_ortu,
+            ]);
+            $ortu->anak()->attach($siswa->id);
+        }
+        OrangTua::whereHas('user', fn ($q) => $q->where('username', 'ortu26001'))->first()
+            ->anak()->attach($semuaSiswa[10]->id);
 
         // Pengampu: setiap kelas mendapat 10 mapel
         $pengampuPerKelas = [];

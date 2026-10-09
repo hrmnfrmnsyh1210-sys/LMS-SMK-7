@@ -13,13 +13,14 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    public const ROLES = ['operator', 'kepsek', 'guru', 'siswa'];
+    public const ROLES = ['operator', 'kepsek', 'guru', 'siswa', 'ortu'];
 
     public const LABEL_ROLE = [
         'operator' => 'Operator',
         'kepsek' => 'Kepala Sekolah',
         'guru' => 'Guru',
         'siswa' => 'Siswa',
+        'ortu' => 'Orang Tua',
     ];
 
     protected $fillable = [
@@ -57,8 +58,14 @@ class User extends Authenticatable
         return $this->hasOne(Siswa::class);
     }
 
-    /** Profil sesuai role (operator/kepsek/guru/siswa). */
-    public function profil(): Operator|Kepsek|Guru|Siswa|null
+    /** Profil orang tua; nama relasi sama dengan kunci role agar profil() bekerja. */
+    public function ortu(): HasOne
+    {
+        return $this->hasOne(OrangTua::class);
+    }
+
+    /** Profil sesuai role (operator/kepsek/guru/siswa/ortu). */
+    public function profil(): Operator|Kepsek|Guru|Siswa|OrangTua|null
     {
         return $this->{$this->role};
     }

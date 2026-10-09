@@ -32,8 +32,8 @@
                     data: {
                         labels: d.labels,
                         datasets: [
-                            { label: 'Nilai', data: d.nilai, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.12)', fill: true, tension: .35, pointRadius: 4 },
-                            { label: 'KKM', data: d.kkm, borderColor: '#ef4444', borderDash: [6, 4], pointRadius: 0, fill: false },
+                            { label: 'Nilai', data: d.nilai, borderColor: '#7290d6', backgroundColor: 'rgba(114,144,214,.14)', fill: true, tension: .35, pointRadius: 4 },
+                            { label: 'KKM', data: d.kkm, borderColor: '#e59a9a', borderDash: [6, 4], pointRadius: 0, fill: false },
                         ],
                     },
                     options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { position: 'bottom' } } },

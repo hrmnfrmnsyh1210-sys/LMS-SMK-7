@@ -14,7 +14,7 @@ class ProfilTest extends TestCase
 
     public function test_semua_role_dapat_membuka_profil(): void
     {
-        foreach (['operator', 'kepsek', 'guru', 'siswa'] as $role) {
+        foreach (['operator', 'kepsek', 'guru', 'siswa', 'ortu'] as $role) {
             $this->actingAs($this->userRole($role))->get('/profil')->assertOk();
         }
     }

@@ -16,6 +16,15 @@ class Kuis extends Model
 
     public const JENIS = ['kuis' => 'Kuis', 'uts' => 'UTS', 'uas' => 'UAS'];
 
+    /** Status kuis dari sisi siswa, urut prioritas tampil (lihat PengerjaanKuisService::statusSiswa). */
+    public const STATUS_SISWA = [
+        'tersedia' => 'Bisa dikerjakan',
+        'dikerjakan' => 'Sedang dikerjakan',
+        'akan_datang' => 'Akan datang',
+        'dikumpulkan' => 'Sudah dikerjakan',
+        'terlewat' => 'Terlewat',
+    ];
+
     protected $fillable = [
         'pengampu_id', 'judul', 'jenis', 'waktu_mulai', 'waktu_selesai', 'durasi_menit', 'acak_soal', 'tampilkan_hasil',
     ];
