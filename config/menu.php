@@ -1,0 +1,61 @@
+<?php
+
+/*
+| Menu sidebar per role. Item dengan 'judul' adalah pemisah grup.
+| 'aktif' = pola nama route untuk menandai menu aktif.
+*/
+
+return [
+    'operator' => [
+        ['label' => 'Dashboard', 'route' => 'operator.dashboard', 'ikon' => 'home'],
+
+        ['judul' => 'Pengguna'],
+        ['label' => 'Guru', 'route' => 'operator.guru.index', 'aktif' => 'operator.guru.*', 'ikon' => 'user-group'],
+        ['label' => 'Siswa', 'route' => 'operator.siswa.index', 'aktif' => 'operator.siswa.*', 'ikon' => 'academic-cap'],
+        ['label' => 'Kepala Sekolah', 'route' => 'operator.kepsek.index', 'aktif' => 'operator.kepsek.*', 'ikon' => 'user'],
+        ['label' => 'Import Excel', 'route' => 'operator.import.index', 'aktif' => 'operator.import.*', 'ikon' => 'upload'],
+
+        ['judul' => 'Data Master'],
+        ['label' => 'Tahun Ajaran', 'route' => 'operator.tahun-ajaran.index', 'aktif' => 'operator.tahun-ajaran.*', 'ikon' => 'calendar'],
+        ['label' => 'Jurusan', 'route' => 'operator.jurusan.index', 'aktif' => 'operator.jurusan.*', 'ikon' => 'tag'],
+        ['label' => 'Kelas', 'route' => 'operator.kelas.index', 'aktif' => 'operator.kelas.*', 'ikon' => 'building'],
+        ['label' => 'Mata Pelajaran', 'route' => 'operator.mapel.index', 'aktif' => 'operator.mapel.*', 'ikon' => 'book'],
+
+        ['judul' => 'Penugasan'],
+        ['label' => 'Pengampu', 'route' => 'operator.pengampu.index', 'aktif' => 'operator.pengampu.*', 'ikon' => 'link'],
+        ['label' => 'Wali Kelas', 'route' => 'operator.wali-kelas.index', 'aktif' => 'operator.wali-kelas.*', 'ikon' => 'star'],
+        ['label' => 'Jadwal', 'route' => 'operator.jadwal.index', 'aktif' => 'operator.jadwal.*', 'ikon' => 'clock'],
+
+        ['judul' => 'Sistem'],
+        ['label' => 'Pengaturan Sekolah', 'route' => 'operator.pengaturan.edit', 'aktif' => 'operator.pengaturan.*', 'ikon' => 'cog'],
+        ['label' => 'Pergantian Tahun Ajaran', 'route' => 'operator.pergantian-tahun-ajaran.index', 'aktif' => 'operator.pergantian-tahun-ajaran.*', 'ikon' => 'refresh'],
+        ['label' => 'Kenaikan Kelas', 'route' => 'operator.kenaikan-kelas.index', 'aktif' => 'operator.kenaikan-kelas.*', 'ikon' => 'arrow-up'],
+        ['label' => 'Log Aktivitas', 'route' => 'operator.log.index', 'aktif' => 'operator.log.*', 'ikon' => 'list'],
+        ['label' => 'Backup & Restore', 'route' => 'operator.backup.index', 'aktif' => 'operator.backup.*', 'ikon' => 'database'],
+        ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
+    ],
+
+    'kepsek' => [
+        ['label' => 'Dashboard', 'route' => 'kepsek.dashboard', 'ikon' => 'home'],
+        ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
+    ],
+
+    'guru' => [
+        ['label' => 'Dashboard', 'route' => 'guru.dashboard', 'ikon' => 'home'],
+        ['label' => 'Kelas Ajar', 'route' => 'guru.kelas.index', 'aktif' => ['guru.kelas.*', 'guru.materi.*', 'guru.tugas.*', 'guru.kuis.*', 'guru.soal.*', 'guru.presensi.*', 'guru.nilai.*', 'guru.forum.*', 'guru.monitoring.*'], 'ikon' => 'book'],
+        ['label' => 'Pengumuman', 'route' => 'guru.pengumuman.index', 'aktif' => 'guru.pengumuman.*', 'ikon' => 'megaphone'],
+
+        // 'syarat' => 'wali': hanya tampil bila guru menjadi wali kelas di tahun ajaran aktif.
+        ['judul' => 'Wali Kelas', 'syarat' => 'wali'],
+        ['label' => 'Rekap Kelas', 'route' => 'guru.wali.rekap', 'ikon' => 'chart', 'syarat' => 'wali'],
+        ['label' => 'Surat Izin', 'route' => 'guru.wali.surat-izin', 'aktif' => 'guru.wali.surat-izin*', 'ikon' => 'document', 'syarat' => 'wali'],
+
+        ['judul' => 'Akun'],
+        ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
+    ],
+
+    'siswa' => [
+        ['label' => 'Dashboard', 'route' => 'siswa.dashboard', 'ikon' => 'home'],
+        ['label' => 'Profil Akun', 'route' => 'profil.edit', 'aktif' => 'profil.*', 'ikon' => 'user'],
+    ],
+];
