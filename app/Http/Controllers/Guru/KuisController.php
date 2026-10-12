@@ -8,6 +8,7 @@ use App\Http\Requests\Guru\KuisRequest;
 use App\Models\Kuis;
 use App\Models\Pengampu;
 use App\Services\ActivityLogger;
+use App\Services\AsistenAiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -48,11 +49,13 @@ class KuisController extends Controller
     }
 
     /** Detail kuis + bank soal. */
-    public function show(Pengampu $pengampu, Kuis $kuis): View
+    public function show(Pengampu $pengampu, Kuis $kuis, AsistenAiService $ai): View
     {
         $kuis->load('soal')->loadCount(['jawaban']);
+        $materi = $pengampu->materi()->orderBy('pertemuan_ke')->get(['id', 'judul', 'pertemuan_ke']);
+        $aiAktif = $ai->aktif();
 
-        return view('guru.kuis.show', compact('pengampu', 'kuis'));
+        return view('guru.kuis.show', compact('pengampu', 'kuis', 'materi', 'aiAktif'));
     }
 
     public function edit(Pengampu $pengampu, Kuis $kuis): View

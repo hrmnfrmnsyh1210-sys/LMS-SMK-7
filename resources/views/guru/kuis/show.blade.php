@@ -25,6 +25,34 @@
             </div>
 
             @unless ($terkunci)
+                <div class="card card-body space-y-3" x-data="{ memuat: false }">
+                    <div class="flex items-center gap-2">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600"><x-icon name="sparkles" class="h-4 w-4" /></span>
+                        <h3 class="card-title">Buat Soal dengan AI</h3>
+                    </div>
+                    @if ($aiAktif)
+                        <p class="text-xs text-slate-500">AI menyusun draf soal. Anda meninjau dan mengubahnya dulu sebelum disimpan.</p>
+                        <form method="POST" action="{{ route('guru.soal.ai.buat', [$pengampu, $kuis]) }}" class="space-y-2" @submit="memuat = true">
+                            @csrf
+                            <x-field.textarea name="topik" label="Topik / kompetensi" rows="2" required placeholder="Mis. Perulangan for dan while pada PHP" />
+                            <div class="grid grid-cols-2 gap-2">
+                                <x-field.input name="jumlah" type="number" label="Jumlah" min="1" max="20" :value="5" required />
+                                <x-field.select name="tipe" label="Tipe" :options="\App\Services\AsistenAiService::TIPE_SOAL" value="pg" />
+                            </div>
+                            <x-field.select name="kesulitan" label="Kesulitan" :options="\App\Services\AsistenAiService::KESULITAN" value="sedang" />
+                            @if ($materi->isNotEmpty())
+                                <x-field.select name="materi_id" label="Acuan materi (opsional)" placeholder="Tanpa materi"
+                                                :options="$materi->mapWithKeys(fn ($m) => [$m->id => 'P'.$m->pertemuan_ke.' · '.$m->judul])->all()" />
+                            @endif
+                            <button type="submit" class="btn-primary btn-sm w-full" :disabled="memuat">
+                                <x-icon name="sparkles" class="h-3.5 w-3.5" /> <span x-text="memuat ? 'AI sedang menyusun soal…' : 'Buat draf soal'"></span>
+                            </button>
+                        </form>
+                    @else
+                        <p class="text-xs text-slate-500">Fitur AI belum diaktifkan. Minta operator mengisi <code>AI_API_KEY</code> di file <code>.env</code>.</p>
+                    @endif
+                </div>
+
                 <div class="card card-body space-y-3">
                     <h3 class="card-title">Import Soal dari Excel</h3>
                     <p class="text-xs text-slate-500">Kolom: tipe (pg/esai), pertanyaan, opsi_a–opsi_d, kunci_jawaban (a/b/c/d), bobot.</p>

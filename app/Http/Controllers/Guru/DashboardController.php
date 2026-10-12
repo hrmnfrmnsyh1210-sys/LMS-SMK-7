@@ -12,6 +12,7 @@ use App\Models\Pengumuman;
 use App\Models\SuratIzin;
 use App\Models\TahunAjaran;
 use App\Models\Tugas;
+use App\Services\GrafikService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -19,7 +20,7 @@ class DashboardController extends Controller
 {
     private const HARI = [1 => 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request, GrafikService $grafik): View
     {
         $guru = $request->user()->guru;
         $pengampuIds = Pengampu::tahunAktif()->where('guru_id', $guru->id)->pluck('id');
@@ -68,8 +69,16 @@ class DashboardController extends Controller
 
         $notifikasi = $request->user()->unreadNotifications()->latest()->limit(5)->get();
 
+        $grafik = [
+            'nilai' => $grafik->rataNilaiPerPengampu($pengampuIds),
+            'pengumpulan' => $grafik->pengumpulanMingguan($pengampuIds),
+            'capaian' => $grafik->capaian($pengampuIds),
+            'kehadiran' => $grafik->trenKehadiran($pengampuIds),
+        ];
+        $kkm = (float) pengaturan('kkm', 75);
+
         return view('guru.dashboard', compact(
-            'jadwalHariIni', 'perluDinilai', 'statistik', 'pengumuman', 'deadline', 'kelasWali', 'notifikasi'
+            'jadwalHariIni', 'perluDinilai', 'statistik', 'pengumuman', 'deadline', 'kelasWali', 'notifikasi', 'grafik', 'kkm'
         ));
     }
 }

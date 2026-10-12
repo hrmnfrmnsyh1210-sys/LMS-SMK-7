@@ -22,6 +22,53 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
+        <div class="card lg:col-span-2">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Aktivitas Sistem</h3>
+                    <p class="text-xs text-slate-500">Login dan aktivitas pengguna 14 hari terakhir</p>
+                </div>
+                <a href="{{ route('operator.log.index') }}" class="card-link">Log</a>
+            </div>
+            <x-grafik.area class="h-72 lg:h-[22rem] px-4 pb-5 sm:px-6" :label="$grafik['aktivitas']['label']" :seri="$grafik['aktivitas']['seri']"
+                           kosong="Belum ada aktivitas dalam 14 hari terakhir." />
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Kelengkapan Data</h3>
+                    <p class="text-xs text-slate-500">Kesiapan data tahun ajaran aktif</p>
+                </div>
+            </div>
+            <x-grafik.cincin class="px-4 pb-6 sm:px-6" :data="$grafik['kesehatan']" />
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="card lg:col-span-2">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Siswa per Kelas</h3>
+                    <p class="text-xs text-slate-500">Jumlah anggota tiap kelas tahun ajaran aktif</p>
+                </div>
+                <a href="{{ route('operator.laporan.index', ['jenis' => 'kesiswaan']) }}" class="card-link">Laporan</a>
+            </div>
+            <x-grafik.batang class="h-72 lg:h-80 px-4 pb-5 sm:px-6" :label="$grafik['siswaKelas']['label']" :nilai="$grafik['siswaKelas']['nilai']"
+                             nama="Jumlah siswa" kosong="Belum ada kelas pada tahun ajaran aktif." />
+        </div>
+
+        {{-- Komposisi siswa per jurusan --}}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Siswa per Jurusan</h3>
+                <a href="{{ route('operator.kelas.index') }}" class="card-link">Lihat Kelas</a>
+            </div>
+            <x-grafik-donat class="px-4 pb-6 sm:px-6" :data="$komposisiJurusan" label-tengah="Siswa berkelas" />
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
         {{-- Aktivitas terbaru --}}
         <div class="card lg:col-span-2">
             <div class="card-header">
@@ -74,7 +121,7 @@
         </div>
     </div>
 
-    <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div class="grid gap-6 md:grid-cols-2">
         {{-- Kalender --}}
         <div class="card">
             <div class="card-header"><h3 class="card-title">Kalender Akademik</h3></div>
@@ -103,13 +150,5 @@
             </div>
         </div>
 
-        {{-- Komposisi siswa per jurusan --}}
-        <div class="card md:col-span-2 xl:col-span-1">
-            <div class="card-header">
-                <h3 class="card-title">Siswa per Jurusan</h3>
-                <a href="{{ route('operator.kelas.index') }}" class="card-link">Lihat Kelas</a>
-            </div>
-            <x-grafik-donat class="px-4 pb-6 sm:px-6" :data="$komposisiJurusan" label-tengah="Siswa berkelas" />
-        </div>
     </div>
 </x-layouts.app>

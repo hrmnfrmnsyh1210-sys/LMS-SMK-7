@@ -28,6 +28,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // LLM dari SumoPod (API kompatibel OpenAI). Fitur AI nonaktif bila key kosong.
+    'ai' => [
+        'base_url' => env('AI_BASE_URL', 'https://ai.sumopod.com/v1'),
+        'key' => env('AI_API_KEY'),
+        'model' => env('AI_MODEL', 'gpt-4o-mini'),
+        'timeout' => (int) env('AI_TIMEOUT', 60),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

@@ -18,6 +18,55 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
+        <div class="card lg:col-span-2">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Rata-rata Nilai Kelas Ajar</h3>
+                    <p class="text-xs text-slate-500">Nilai akhir per mapel & kelas · batang ungu di bawah KKM</p>
+                </div>
+                <a href="{{ route('guru.laporan.index') }}" class="card-link">Laporan</a>
+            </div>
+            <x-grafik.batang class="h-72 lg:h-96 px-4 pb-5 sm:px-6" :label="$grafik['nilai']['label']" :nilai="$grafik['nilai']['nilai']"
+                             nama="Rata-rata nilai" :maks="100" :garis="['label' => 'KKM', 'nilai' => $kkm]"
+                             kosong="Nilai akhir muncul setelah Anda menghitung nilai di menu Nilai tiap kelas." />
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Capaian Kelas Saya</h3>
+                    <p class="text-xs text-slate-500">Gabungan seluruh kelas ajar</p>
+                </div>
+            </div>
+            <x-grafik.cincin class="px-4 pb-6 sm:px-6" :data="$grafik['capaian']" />
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Pengumpulan Tugas</h3>
+                    <p class="text-xs text-slate-500">Per minggu, 8 minggu terakhir</p>
+                </div>
+            </div>
+            <x-grafik.area class="h-64 px-4 pb-5 sm:px-6" :label="$grafik['pengumpulan']['label']" :seri="$grafik['pengumpulan']['seri']"
+                           kosong="Belum ada tugas yang dikumpulkan siswa." />
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Tren Kehadiran Siswa</h3>
+                    <p class="text-xs text-slate-500">Persentase hadir dan alpa per periode</p>
+                </div>
+            </div>
+            <x-grafik.area class="h-64 px-4 pb-5 sm:px-6" :label="$grafik['kehadiran']['label']" :seri="$grafik['kehadiran']['seri']" satuan="%" :maks="100"
+                           kosong="Belum ada presensi yang diisi." />
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
         {{-- Jadwal hari ini --}}
         <div class="card">
             <div class="card-header">

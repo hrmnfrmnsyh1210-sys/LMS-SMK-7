@@ -32,6 +32,9 @@ return [
         ['label' => 'Berita & Agenda', 'route' => 'operator.berita.index', 'aktif' => 'operator.berita.*', 'ikon' => 'megaphone'],
         ['label' => 'Galeri', 'route' => 'operator.galeri.index', 'aktif' => 'operator.galeri.*', 'ikon' => 'photo'],
 
+        ['judul' => 'Laporan'],
+        ['label' => 'Laporan', 'route' => 'operator.laporan.index', 'ikon' => 'document'],
+
         ['judul' => 'Sistem'],
         ['label' => 'Pengaturan Sekolah', 'route' => 'operator.pengaturan.edit', 'aktif' => 'operator.pengaturan.*', 'ikon' => 'cog'],
         ['label' => 'Pergantian Tahun Ajaran', 'route' => 'operator.pergantian-tahun-ajaran.index', 'aktif' => 'operator.pergantian-tahun-ajaran.*', 'ikon' => 'refresh'],
@@ -47,6 +50,7 @@ return [
         ['judul' => 'Monitoring'],
         ['label' => 'Keaktifan Guru', 'route' => 'kepsek.monitoring.guru', 'ikon' => 'user-group'],
         ['label' => 'Rekap Kelas', 'route' => 'kepsek.monitoring.kelas', 'aktif' => 'kepsek.monitoring.kelas*', 'ikon' => 'chart'],
+        ['label' => 'Laporan', 'route' => 'kepsek.laporan.index', 'ikon' => 'document'],
         ['label' => 'Pengumuman', 'route' => 'kepsek.pengumuman.index', 'aktif' => 'kepsek.pengumuman.*', 'ikon' => 'megaphone'],
 
         ['judul' => 'Akun'],
@@ -57,6 +61,7 @@ return [
         ['label' => 'Dashboard', 'route' => 'guru.dashboard', 'ikon' => 'home'],
         ['label' => 'Kelas Ajar', 'route' => 'guru.kelas.index', 'aktif' => ['guru.kelas.*', 'guru.materi.*', 'guru.tugas.*', 'guru.kuis.*', 'guru.soal.*', 'guru.presensi.*', 'guru.nilai.*', 'guru.forum.*', 'guru.monitoring.*'], 'ikon' => 'book'],
         ['label' => 'Pengumuman', 'route' => 'guru.pengumuman.index', 'aktif' => 'guru.pengumuman.*', 'ikon' => 'megaphone'],
+        ['label' => 'Laporan', 'route' => 'guru.laporan.index', 'ikon' => 'document'],
 
         // 'syarat' => 'wali': hanya tampil bila guru menjadi wali kelas di tahun ajaran aktif.
         ['judul' => 'Wali Kelas', 'syarat' => 'wali'],
@@ -75,6 +80,7 @@ return [
         ['label' => 'Tugas', 'route' => 'siswa.tugas.index', 'aktif' => 'siswa.tugas.*', 'ikon' => 'clipboard-check'],
         ['label' => 'Kuis & Ujian', 'route' => 'siswa.kuis.index', 'aktif' => 'siswa.kuis.*', 'ikon' => 'puzzle'],
         ['label' => 'Jadwal', 'route' => 'siswa.jadwal', 'ikon' => 'clock'],
+        ['label' => 'Asisten Belajar', 'route' => 'siswa.asisten', 'ikon' => 'sparkles'],
 
         ['judul' => 'Progres'],
         ['label' => 'Nilai', 'route' => 'siswa.nilai', 'ikon' => 'chart'],

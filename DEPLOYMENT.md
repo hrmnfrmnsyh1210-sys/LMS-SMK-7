@@ -110,7 +110,15 @@ QUEUE_CONNECTION=sync          # tidak ada worker antrean di shared hosting
 FILESYSTEM_DISK=public
 
 UPLOAD_MAX_KB=20480
+
+# Fitur AI (SumoPod). Kosongkan AI_API_KEY bila tidak dipakai.
+AI_BASE_URL=https://ai.sumopod.com/v1
+AI_API_KEY=
+AI_MODEL=gpt-4o-mini
+AI_TIMEOUT=60
 ```
+
+Fitur AI memanggil `ai.sumopod.com` lewat HTTPS keluar. Bila hosting membatasi `max_execution_time` di bawah 60 detik, turunkan `AI_TIMEOUT` agar permintaan AI gagal dengan pesan yang jelas, bukan error 500.
 
 Pastikan HTTPS aktif (SSL gratis dari panel hosting) sebelum mengisi `SESSION_SECURE_COOKIE=true`.
 

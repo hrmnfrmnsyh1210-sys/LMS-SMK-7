@@ -12,6 +12,7 @@ Teknologi: Laravel 13 (PHP ≥ 8.3), MySQL/MariaDB, Blade + Tailwind CSS v4 + Al
 | 2 | Fitur Guru (kelas ajar, materi, tugas, kuis PG+esai, presensi, nilai, forum, pengumuman, monitoring & ranking, wali kelas + surat izin) | ✅ Selesai |
 | 3 | Fitur Siswa (mapel & materi, tugas, kuis dengan timer/autosave, jadwal, presensi, nilai, forum, surat izin, pengumuman) & Kepala Sekolah (dashboard, keaktifan guru, rekap kelas, pengumuman sekolah) | ✅ Selesai |
 | 3b | Role Orang Tua (akun per anak/kakak-adik, pantau nilai, presensi, tugas, kuis, jadwal, pengumuman, surat izin) | ✅ Selesai |
+| 5 | Fitur AI (SumoPod) dan laporan PDF/Excel untuk operator, kepala sekolah, dan guru | ✅ Selesai |
 | 4 | Pengujian lanjutan, halaman error, header keamanan, penjadwal otomatis, panduan deployment ([DEPLOYMENT.md](DEPLOYMENT.md)) | ✅ Selesai |
 
 ## Instalasi lokal
@@ -98,6 +99,29 @@ Tabel baru `orang_tua` dan pivot `orang_tua_siswa` (satu akun dapat memantau beb
 - **Penjadwal** (`routes/console.php`, butuh satu cron per menit): `lms:tutup-kuis` tiap 5 menit dan `lms:bersihkan-notifikasi` harian.
 - **Test alur lintas role** guru → siswa → orang tua → wali kelas (`tests/Feature/Fase3AlurSiswaOrtuTest.php`).
 - **Panduan deployment** shared hosting: [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## Laporan & fitur AI
+
+**Laporan** (menu *Laporan*, semua bisa diekspor ke **PDF** berkop sekolah dan **Excel**, termasuk tahun ajaran lalu):
+
+- **Operator & kepala sekolah:** akademik semester (kehadiran, rata-rata nilai, ketuntasan per kelas), data kesiswaan (L/P per kelas, ringkasan akun), kehadiran kelas, dan nilai kelas (nilai per mapel + peringkat).
+- **Guru:** nilai & kehadiran tiap mapel yang diampu; wali kelas juga mendapat nilai & kehadiran kelas perwaliannya.
+
+**AI** memakai LLM dari [SumoPod](https://ai.sumopod.com) (API kompatibel OpenAI, murni HTTP sehingga aman untuk shared hosting). Isi di `.env`:
+
+```env
+AI_BASE_URL=https://ai.sumopod.com/v1
+AI_API_KEY=sk-...        # kosong = semua fitur AI nonaktif
+AI_MODEL=gpt-4o-mini     # sesuaikan dengan model yang tersedia di dashboard SumoPod
+AI_TIMEOUT=60
+```
+
+- **Guru · Buat soal dengan AI** (halaman kuis): topik, jumlah, tipe, kesulitan, opsional acuan materi → draf ditinjau/diubah → hanya yang dicentang disimpan ke bank soal.
+- **Guru · Saran koreksi esai** (halaman koreksi): saran skor (dibatasi bobot soal) + alasan; guru tetap yang menyimpan skor.
+- **Analisis AI laporan** (operator, kepsek, guru): temuan utama, kelas/siswa yang perlu perhatian, dan rekomendasi.
+- **Siswa · Asisten Belajar**: tanya-jawab dengan konteks materi mapel di kelasnya sendiri; riwayat obrolan tidak disimpan di server.
+
+Setiap permintaan AI dibatasi 10 kali/menit per pengguna (`throttle:ai`), dan jawaban AI dirender sebagai markdown dengan HTML mentah dibuang.
 
 ## Catatan skema
 

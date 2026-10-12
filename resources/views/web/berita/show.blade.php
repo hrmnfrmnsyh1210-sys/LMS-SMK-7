@@ -1,4 +1,4 @@
-<x-layouts.web :title="$berita->judul" :description="$berita->cuplikan(160)">
+<x-layouts.web :title="$berita->judul" :latar-akhir="$lainnya->isNotEmpty() ? '#f6f8fc' : '#ffffff'" :description="$berita->cuplikan(160)">
     @if ($berita->gambar)
         @push('head')
             <meta property="og:image" content="{{ file_url($berita->gambar) }}">

@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Guru;
 
+use App\Exceptions\AiGagalException;
 use App\Http\Controllers\Controller;
 use App\Models\JawabanKuis;
 use App\Models\Kuis;
 use App\Models\Pengampu;
 use App\Notifications\Pemberitahuan;
 use App\Services\ActivityLogger;
+use App\Services\AsistenAiService;
 use App\Services\KuisService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -38,13 +41,35 @@ class HasilKuisController extends Controller
         return view('guru.kuis.hasil', compact('pengampu', 'kuis', 'daftar', 'ringkasan'));
     }
 
-    public function koreksi(Pengampu $pengampu, Kuis $kuis, JawabanKuis $jawaban): View
+    public function koreksi(Pengampu $pengampu, Kuis $kuis, JawabanKuis $jawaban, AsistenAiService $ai): View
     {
         $jawaban->load(['siswa', 'detail']);
         $kuis->load('soal');
         $detail = $jawaban->detail->keyBy('soal_id');
+        $aiAktif = $ai->aktif();
 
-        return view('guru.kuis.koreksi', compact('pengampu', 'kuis', 'jawaban', 'detail'));
+        return view('guru.kuis.koreksi', compact('pengampu', 'kuis', 'jawaban', 'detail', 'aiAktif'));
+    }
+
+    /** Saran skor esai dari AI; guru tetap yang menentukan dan menyimpan skor. */
+    public function saranAi(Pengampu $pengampu, Kuis $kuis, JawabanKuis $jawaban, AsistenAiService $ai): JsonResponse
+    {
+        $esai = $jawaban->detail()->with('soal')->get()
+            ->filter(fn ($d) => ! $d->soal->isPilihanGanda() && filled($d->jawaban));
+
+        if ($esai->isEmpty()) {
+            return response()->json(['pesan' => 'Tidak ada jawaban esai yang perlu dikoreksi.'], 422);
+        }
+
+        try {
+            $saran = $ai->saranKoreksiEsai($kuis, $esai);
+        } catch (AiGagalException $e) {
+            return response()->json(['pesan' => $e->getMessage()], 503);
+        }
+
+        ActivityLogger::log('ai_saran_koreksi', "Saran koreksi AI \"{$kuis->judul}\" milik {$jawaban->siswa->nama}");
+
+        return response()->json(['saran' => $saran]);
     }
 
     public function simpanKoreksi(Request $request, Pengampu $pengampu, Kuis $kuis, JawabanKuis $jawaban): RedirectResponse

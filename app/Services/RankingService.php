@@ -60,7 +60,7 @@ class RankingService
      * @param  Collection<int, array<string, mixed>>  $baris  setiap baris punya kunci 'rata'
      * @return Collection<int, array<string, mixed>>
      */
-    private function beriPeringkat(Collection $baris): Collection
+    public function beriPeringkat(Collection $baris): Collection
     {
         $urut = $baris->sortByDesc(fn ($b) => $b['rata'] ?? -1)->values();
 

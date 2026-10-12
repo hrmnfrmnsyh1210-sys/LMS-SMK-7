@@ -44,5 +44,9 @@
                 <x-icon :name="$ikon" class="h-4 w-4" /> {{ $label }}
             </a>
         @endforeach
+        <a href="{{ route('siswa.asisten', ['mapel' => $pengampu->id]) }}"
+           class="ml-auto flex shrink-0 items-center gap-2 rounded-full px-4 py-2 font-medium text-pink-600 transition hover:bg-pink-50">
+            <x-icon name="sparkles" class="h-4 w-4" /> Tanya Asisten
+        </a>
     </nav>
 </div>

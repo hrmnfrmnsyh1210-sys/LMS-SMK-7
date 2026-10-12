@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Models\Pengaturan;
 use App\Models\TahunAjaran;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -22,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Kebijakan password mengikuti pengaturan sistem.
         Password::defaults(fn () => Password::min((int) Pengaturan::ambil('min_panjang_password', 8)));
+
+        // Permintaan ke layanan AI berbayar dibatasi per pengguna.
+        RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
 
         View::composer('*', function ($view) {
             try {

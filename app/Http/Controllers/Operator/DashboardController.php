@@ -12,6 +12,7 @@ use App\Models\Pengampu;
 use App\Models\Pengumuman;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Services\GrafikService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -19,7 +20,7 @@ class DashboardController extends Controller
     /** Warna irisan grafik donat komposisi jurusan. */
     private const WARNA_JURUSAN = ['#7f9ce0', '#7cc9a5', '#f2c27b', '#ee9a9a', '#b29ced', '#7fcbdc', '#eba3c8'];
 
-    public function __invoke(): View
+    public function __invoke(GrafikService $grafik): View
     {
         $tahunId = TahunAjaran::aktifId();
 
@@ -56,6 +57,12 @@ class DashboardController extends Controller
 
         $pengumumanTerbaru = Pengumuman::latest()->limit(3)->get();
 
-        return view('operator.dashboard', compact('statistik', 'komposisiJurusan', 'logTerbaru', 'pengumumanTerbaru'));
+        $grafik = [
+            'aktivitas' => $grafik->aktivitasHarian(),
+            'siswaKelas' => $grafik->siswaPerKelas(),
+            'kesehatan' => $grafik->kesehatanData(),
+        ];
+
+        return view('operator.dashboard', compact('statistik', 'komposisiJurusan', 'logTerbaru', 'pengumumanTerbaru', 'grafik'));
     }
 }

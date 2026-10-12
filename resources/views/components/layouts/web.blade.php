@@ -1,4 +1,6 @@
-@props(['title' => null, 'description' => null])
+@props(['title' => null, 'description' => null, 'latarAkhir' => '#f6f8fc'])
+
+{{-- $latarAkhir: warna latar section terakhir halaman, agar gelombang footer menyambung mulus. --}}
 
 @php
     $logo = $sekolah['logo'] ? file_url($sekolah['logo']) : null;
@@ -104,63 +106,7 @@
     <main>{{ $slot }}</main>
 
     {{-- ================= FOOTER ================= --}}
-    <footer class="bg-navy-950 text-slate-400">
-        <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
-            <div class="lg:col-span-2">
-                <div class="flex items-center gap-3">
-                    @if ($logo)
-                        <img src="{{ $logo }}" alt="" class="h-11 w-11 rounded-xl bg-white object-contain p-0.5">
-                    @else
-                        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white"><x-icon name="academic-cap" class="h-6 w-6" /></span>
-                    @endif
-                    <div>
-                        <div class="font-display text-lg font-bold text-white">{{ $sekolah['nama_sekolah'] }}</div>
-                        @if ($sekolah['npsn'])
-                            <div class="text-xs">NPSN {{ $sekolah['npsn'] }}</div>
-                        @endif
-                    </div>
-                </div>
-                @if ($sekolah['web_hero_subjudul'])
-                    <p class="mt-4 max-w-md text-sm leading-relaxed">{{ $sekolah['web_hero_subjudul'] }}</p>
-                @endif
-                @if ($sosial)
-                    <div class="mt-5 flex flex-wrap gap-2">
-                        @foreach ($sosial as $nama => $url)
-                            <a href="{{ $url }}" target="_blank" rel="noopener" class="rounded-full border border-slate-700 px-3.5 py-1.5 text-xs font-medium text-slate-300 transition hover:border-kuning-400 hover:text-white">{{ $nama }}</a>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-
-            <div>
-                <h3 class="text-sm font-semibold tracking-wide text-white uppercase">Tautan</h3>
-                <ul class="mt-4 space-y-2 text-sm">
-                    @foreach ($menu as $item)
-                        <li><a href="{{ $item['url'] }}" class="hover:text-white">{{ $item['label'] }}</a></li>
-                    @endforeach
-                    <li><a href="{{ route('login') }}" class="hover:text-white">Masuk LMS</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h3 class="text-sm font-semibold tracking-wide text-white uppercase">Kontak</h3>
-                <ul class="mt-4 space-y-3 text-sm">
-                    @if ($sekolah['alamat_sekolah'])
-                        <li class="flex gap-2.5"><x-icon name="map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-kuning-400" /> {{ $sekolah['alamat_sekolah'] }}</li>
-                    @endif
-                    @if ($sekolah['telepon_sekolah'])
-                        <li class="flex gap-2.5"><x-icon name="phone" class="mt-0.5 h-4 w-4 shrink-0 text-kuning-400" /> {{ $sekolah['telepon_sekolah'] }}</li>
-                    @endif
-                    @if ($sekolah['email_sekolah'])
-                        <li class="flex gap-2.5"><x-icon name="envelope" class="mt-0.5 h-4 w-4 shrink-0 text-kuning-400" /> <a href="mailto:{{ $sekolah['email_sekolah'] }}" class="break-all hover:text-white">{{ $sekolah['email_sekolah'] }}</a></li>
-                    @endif
-                </ul>
-            </div>
-        </div>
-        <div class="border-t border-white/10">
-            <div class="mx-auto max-w-7xl px-4 py-5 text-xs sm:px-6">&copy; {{ date('Y') }} {{ $sekolah['nama_sekolah'] }}. Hak cipta dilindungi.</div>
-        </div>
-    </footer>
+    @include('web.footer')
 
     @stack('scripts')
 </body>

@@ -278,3 +278,37 @@
         @apply font-semibold text-slate-800;
     }
 }
+
+@layer components {
+    /* Jawaban AI (markdown → HTML). */
+    .konten-ai {
+        @apply space-y-2 text-sm leading-relaxed text-slate-700;
+    }
+
+    .konten-ai h1,
+    .konten-ai h2,
+    .konten-ai h3,
+    .konten-ai h4 {
+        @apply pt-1 font-semibold text-slate-800;
+    }
+
+    .konten-ai ul {
+        @apply list-disc space-y-1 pl-5;
+    }
+
+    .konten-ai ol {
+        @apply list-decimal space-y-1 pl-5;
+    }
+
+    .konten-ai code {
+        @apply rounded bg-slate-100 px-1 py-0.5 text-xs;
+    }
+
+    .konten-ai pre {
+        @apply overflow-x-auto rounded-lg bg-slate-800 p-3 text-xs text-slate-100;
+    }
+
+    .konten-ai pre code {
+        @apply bg-transparent p-0 text-slate-100;
+    }
+}

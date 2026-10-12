@@ -1,4 +1,4 @@
-<x-layouts.web title="Galeri" description="Galeri foto kegiatan dan fasilitas {{ $sekolah['nama_sekolah'] }}.">
+<x-layouts.web title="Galeri" latar-akhir="#ffffff" description="Galeri foto kegiatan dan fasilitas {{ $sekolah['nama_sekolah'] }}.">
     <section class="bg-navy-800 pt-32 pb-14 text-white lg:pt-36">
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <h1 class="font-display text-3xl font-bold sm:text-5xl">Galeri</h1>

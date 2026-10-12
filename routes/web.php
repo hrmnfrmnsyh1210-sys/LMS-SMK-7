@@ -5,6 +5,7 @@ use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Guru;
 use App\Http\Controllers\Kepsek;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\Operator;
 use App\Http\Controllers\Ortu;
 use App\Http\Controllers\ProfilController;
@@ -89,6 +90,11 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::resource('berita', Operator\BeritaController::class)->except('show')->parameters(['berita' => 'berita']);
             Route::resource('galeri', Operator\GaleriController::class)->except('show')->parameters(['galeri' => 'galeri']);
 
+            // Laporan
+            Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+            Route::get('laporan/ekspor', [LaporanController::class, 'ekspor'])->name('laporan.ekspor');
+            Route::post('laporan/analisis', [LaporanController::class, 'analisis'])->middleware('throttle:ai')->name('laporan.analisis');
+
             // Log & backup
             Route::get('log-aktivitas', [Operator\LogAktivitasController::class, 'index'])->name('log.index');
             Route::get('backup', [Operator\BackupController::class, 'index'])->name('backup.index');
@@ -103,6 +109,10 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('monitoring/kelas', [Kepsek\MonitoringController::class, 'kelas'])->name('monitoring.kelas');
             Route::get('monitoring/kelas/{kelas}', [Kepsek\MonitoringController::class, 'kelasShow'])->name('monitoring.kelas.show');
 
+            Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+            Route::get('laporan/ekspor', [LaporanController::class, 'ekspor'])->name('laporan.ekspor');
+            Route::post('laporan/analisis', [LaporanController::class, 'analisis'])->middleware('throttle:ai')->name('laporan.analisis');
+
             Route::get('pengumuman', [Kepsek\PengumumanController::class, 'index'])->name('pengumuman.index');
             Route::post('pengumuman', [Kepsek\PengumumanController::class, 'store'])->name('pengumuman.store');
             Route::delete('pengumuman/{pengumuman}', [Kepsek\PengumumanController::class, 'destroy'])->name('pengumuman.destroy');
@@ -113,6 +123,10 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('/', Guru\DashboardController::class)->name('dashboard');
             Route::get('kelas', [Guru\KelasAjarController::class, 'index'])->name('kelas.index');
             Route::get('soal/template', [Guru\SoalController::class, 'template'])->name('soal.template');
+
+            Route::get('laporan', [Guru\LaporanController::class, 'index'])->name('laporan.index');
+            Route::get('laporan/ekspor', [Guru\LaporanController::class, 'ekspor'])->name('laporan.ekspor');
+            Route::post('laporan/analisis', [Guru\LaporanController::class, 'analisis'])->middleware('throttle:ai')->name('laporan.analisis');
 
             Route::get('pengumuman', [Guru\PengumumanController::class, 'index'])->name('pengumuman.index');
             Route::post('pengumuman', [Guru\PengumumanController::class, 'store'])->name('pengumuman.store');
@@ -136,10 +150,14 @@ Route::middleware(['auth', 'aktif'])->group(function () {
                 Route::resource('kuis.soal', Guru\SoalController::class)->except(['index', 'show'])
                     ->parameters(['kuis' => 'kuis', 'soal' => 'soal'])->names('soal');
                 Route::post('kuis/{kuis}/soal-import', [Guru\SoalController::class, 'import'])->name('soal.import');
+                Route::post('kuis/{kuis}/soal-ai', [Guru\SoalAiController::class, 'buat'])->middleware('throttle:ai')->name('soal.ai.buat');
+                Route::get('kuis/{kuis}/soal-ai', [Guru\SoalAiController::class, 'pratinjau'])->name('soal.ai.pratinjau');
+                Route::post('kuis/{kuis}/soal-ai/simpan', [Guru\SoalAiController::class, 'simpan'])->name('soal.ai.simpan');
                 Route::get('kuis/{kuis}/hasil', [Guru\HasilKuisController::class, 'index'])->name('kuis.hasil');
                 Route::post('kuis/{kuis}/hasil/hitung-ulang', [Guru\HasilKuisController::class, 'hitungUlang'])->name('kuis.hitung-ulang');
                 Route::get('kuis/{kuis}/hasil/{jawaban}', [Guru\HasilKuisController::class, 'koreksi'])->name('kuis.koreksi');
                 Route::put('kuis/{kuis}/hasil/{jawaban}', [Guru\HasilKuisController::class, 'simpanKoreksi'])->name('kuis.koreksi.simpan');
+                Route::post('kuis/{kuis}/hasil/{jawaban}/saran-ai', [Guru\HasilKuisController::class, 'saranAi'])->middleware('throttle:ai')->name('kuis.koreksi.ai');
 
                 Route::get('presensi', [Guru\PresensiController::class, 'index'])->name('presensi.index');
                 Route::get('presensi/isi', [Guru\PresensiController::class, 'form'])->name('presensi.form');
@@ -189,6 +207,8 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('presensi', [Siswa\AkademikController::class, 'presensi'])->name('presensi');
             Route::get('nilai', [Siswa\AkademikController::class, 'nilai'])->name('nilai');
             Route::get('pengumuman', [Siswa\AkademikController::class, 'pengumuman'])->name('pengumuman');
+            Route::get('asisten', [Siswa\AsistenController::class, 'index'])->name('asisten');
+            Route::post('asisten', [Siswa\AsistenController::class, 'kirim'])->middleware('throttle:ai')->name('asisten.kirim');
 
             Route::get('surat-izin', [Siswa\SuratIzinController::class, 'index'])->name('surat-izin.index');
             Route::post('surat-izin', [Siswa\SuratIzinController::class, 'store'])->name('surat-izin.store');

@@ -49,7 +49,9 @@
         @endif
         <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-navy-950/80 via-navy-950/25 to-transparent"></div>
 
-        <div class="relative mx-auto mt-auto w-full max-w-7xl px-4 pt-40 pb-14 sm:px-6 lg:pb-20">
+        <x-web.gelombang />
+
+        <div class="relative mx-auto mt-auto w-full max-w-7xl px-4 pt-40 pb-24 sm:px-6 sm:pb-28 lg:pb-32">
             <div class="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-2xl [text-shadow:0_2px_16px_rgba(5,22,51,0.45)]">
                     <p class="flex items-center gap-2 text-sm font-medium text-kuning-300">
@@ -93,8 +95,11 @@
         </div>
     </section>
 
+    {{-- Statistik s.d. galeri dalam satu wadah: hiasan biru boleh melintasi batas section tanpa terpotong. --}}
+    <div class="relative isolate overflow-hidden">
+
     {{-- Statistik --}}
-    <section class="border-b border-slate-200 bg-white">
+    <section class="relative bg-white">
         <div @class(['mx-auto grid max-w-7xl grid-cols-2 px-4 sm:px-6 lg:divide-x lg:divide-slate-200', 'lg:grid-cols-4' => count($angka) === 4, 'lg:grid-cols-3' => count($angka) === 3])>
             @foreach ($angka as $a)
                 <div class="px-2 py-8 lg:px-10 lg:first:pl-0">
@@ -128,11 +133,17 @@
 
     {{-- ================= SAMBUTAN ================= --}}
     @if ($sekolah['web_sambutan_isi'])
-        <section class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-24">
+        <section class="relative">
+            <x-web.lapisan sudut="kanan" y="top-6" />
+            {{-- Melintasi batas sambutan → program keahlian (bila tidak ada section profil berlatar di antaranya). --}}
+            <x-web.lapisan sudut="kiri" :y="$adaProfil ? 'top-1/2 -translate-y-1/2' : 'bottom-0 translate-y-1/2'" :cincin="false" />
+            <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-24">
             <div class="grid items-center gap-12 lg:grid-cols-5">
                 <div class="lg:col-span-2">
                     <div class="relative mx-auto max-w-sm">
-                        <div class="absolute inset-0 translate-x-4 translate-y-4 rounded-xl bg-kuning-300/50"></div>
+                        <div class="absolute -inset-8 -z-10 rounded-[2.5rem] bg-linear-to-br from-[#2f6fed]/15 via-[#13b5cf]/10 to-transparent"></div>
+                        <div class="absolute -top-5 -left-5 h-24 w-24 rounded-full border-2 border-dashed border-[#2f6fed]/25"></div>
+                        <div class="absolute inset-0 translate-x-4 translate-y-4 rounded-xl bg-linear-to-br from-[#2f6fed] to-[#13b5cf] opacity-80"></div>
                         @if ($fotoKepsek)
                             <img src="{{ $fotoKepsek }}" alt="{{ $namaKepsek }}" class="relative aspect-4/5 w-full rounded-xl object-cover">
                         @else
@@ -142,7 +153,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="lg:col-span-3">
+                <div class="lg:col-span-3 lg:pr-24 xl:pr-28">
                     <span class="text-xs font-semibold tracking-[0.2em] text-navy-600 uppercase">Sambutan Kepala Sekolah</span>
                     <h2 class="mt-2 font-display text-3xl font-bold text-navy-900 sm:text-4xl">Selamat datang di {{ $sekolah['nama_sekolah'] }}</h2>
                     <div class="mt-6 space-y-4 leading-relaxed text-slate-600">
@@ -158,12 +169,14 @@
                     @endif
                 </div>
             </div>
+            </div>
         </section>
     @endif
 
     {{-- ================= PROFIL: VISI MISI SEJARAH ================= --}}
     @if ($adaProfil)
-        <section id="profil" class="scroll-mt-20 bg-latar py-20 lg:py-24">
+        <section id="profil" class="relative isolate scroll-mt-20 overflow-hidden bg-latar py-20 lg:py-24">
+            <x-web.lapisan sudut="kiri-atas" :cincin="false" class="opacity-70" />
             <div class="mx-auto max-w-7xl px-4 sm:px-6">
                 <div class="mx-auto max-w-2xl text-center">
                     <span class="text-xs font-semibold tracking-[0.2em] text-navy-600 uppercase">Profil Sekolah</span>
@@ -172,7 +185,8 @@
 
                 <div class="mt-12 grid gap-6 lg:grid-cols-2">
                     @if ($sekolah['web_visi'])
-                        <div class="rounded-xl bg-navy-800 p-8 text-white">
+                        <div class="relative isolate overflow-hidden rounded-xl bg-linear-to-br from-navy-800 via-navy-700 to-[#2f6fed] p-8 text-white">
+                            <x-web.lapisan sudut="kanan-bawah" :cincin="false" class="opacity-40" />
                             <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><x-icon name="light-bulb" class="h-6 w-6" /></span>
                             <h3 class="mt-5 text-xl font-bold">Visi</h3>
                             <p class="mt-3 text-lg leading-relaxed text-white/75">{{ $sekolah['web_visi'] }}</p>
@@ -209,7 +223,11 @@
     @endif
 
     {{-- ================= JURUSAN ================= --}}
-    <section id="jurusan" class="scroll-mt-20 py-20 lg:py-24">
+    <section id="jurusan" class="relative scroll-mt-20 py-20 lg:py-24">
+        @if ($berita->isEmpty() && $galeri->isNotEmpty())
+            {{-- Melintasi batas program keahlian → galeri. --}}
+            <x-web.lapisan sudut="kanan" y="bottom-0 translate-y-1/2" />
+        @endif
         <div class="mx-auto max-w-7xl px-4 sm:px-6">
             <div class="mx-auto max-w-2xl text-center">
                 <span class="text-xs font-semibold tracking-[0.2em] text-navy-600 uppercase">Program Keahlian</span>
@@ -223,7 +241,10 @@
                 <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     @php $warna = ['from-navy-700 to-navy-800', 'from-navy-600 to-navy-700', 'from-navy-800 to-navy-900']; @endphp
                     @foreach ($jurusan as $j)
-                        <div class="group rounded-xl bg-white p-7 ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-900/5">
+                        <div class="group relative isolate overflow-hidden rounded-xl bg-white p-7 shadow-sm shadow-slate-900/5 ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-[#2f6fed]/10">
+                            <div aria-hidden="true" class="absolute -top-16 -right-16 -z-10 h-40 w-40 rounded-full bg-linear-to-br from-[#2f6fed]/15 to-[#13b5cf]/5 transition duration-500 group-hover:scale-125"></div>
+                            <div aria-hidden="true" class="absolute -top-6 -right-6 -z-10 h-24 w-24 rounded-full bg-linear-to-br from-[#2f6fed]/20 to-[#13b5cf]/10"></div>
+                            <div aria-hidden="true" class="absolute inset-x-0 bottom-0 h-1 bg-linear-to-r from-[#2f6fed] to-[#13b5cf] opacity-0 transition group-hover:opacity-100"></div>
                             <span class="inline-flex h-14 min-w-14 items-center justify-center rounded-2xl bg-linear-to-br {{ $warna[$loop->index % 3] }} px-3 text-sm font-bold text-white shadow-md">{{ $j->kode }}</span>
                             <h3 class="mt-5 text-lg font-semibold text-slate-800">{{ $j->nama }}</h3>
                             @if ($j->deskripsi)
@@ -238,7 +259,8 @@
 
     {{-- ================= BERITA ================= --}}
     @if ($berita->isNotEmpty())
-        <section class="bg-latar py-20 lg:py-24">
+        <section class="relative isolate overflow-hidden bg-latar py-20 lg:py-24">
+            <x-web.lapisan sudut="kiri-bawah" :cincin="false" class="opacity-60" />
             <div class="mx-auto max-w-7xl px-4 sm:px-6">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
@@ -258,7 +280,7 @@
 
     {{-- ================= GALERI ================= --}}
     @if ($galeri->isNotEmpty())
-        <section class="py-20 lg:py-24">
+        <section class="relative py-20 lg:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
@@ -272,9 +294,12 @@
         </section>
     @endif
 
+    </div>
+
     {{-- ================= KONTAK ================= --}}
-    <section id="kontak" class="scroll-mt-20 bg-latar py-20 lg:py-24">
-        <div class="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-5">
+    <section id="kontak" class="relative isolate scroll-mt-20 overflow-hidden bg-latar pt-28 pb-8 lg:pt-36 lg:pb-10">
+        <x-web.gelombang posisi="atas" :isi="$galeri->isNotEmpty() || $berita->isEmpty() ? '#ffffff' : '#f6f8fc'" />
+        <div class="relative mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-5">
             <div class="lg:col-span-2">
                 <span class="text-xs font-semibold tracking-[0.2em] text-navy-600 uppercase">Kontak</span>
                 <h2 class="mt-2 font-display text-3xl font-bold text-navy-900 sm:text-4xl">Kunjungi & hubungi kami</h2>

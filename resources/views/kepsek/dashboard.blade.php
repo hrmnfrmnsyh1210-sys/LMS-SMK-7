@@ -12,6 +12,66 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
+        <div class="card lg:col-span-2">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Tren Kehadiran</h3>
+                    <p class="text-xs text-slate-500">Persentase hadir dan alpa seluruh mapel per periode</p>
+                </div>
+                <a href="{{ route('kepsek.laporan.index', ['jenis' => 'akademik']) }}" class="card-link">Laporan</a>
+            </div>
+            <x-grafik.area class="h-72 px-4 pb-5 sm:px-6" :label="$grafik['kehadiran']['label']" :seri="$grafik['kehadiran']['seri']" satuan="%" :maks="100"
+                           kosong="Belum ada presensi pada tahun ajaran aktif." />
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Rata-rata Nilai Sekolah</h3>
+                    <p class="text-xs text-slate-500">Nilai akhir seluruh kelas dibanding KKM</p>
+                </div>
+            </div>
+            <div class="space-y-4 px-4 pb-6 sm:px-6">
+                <x-grafik.gauge :nilai="$statistik['rata']" label="rata-rata nilai akhir" satuan="" :acuan="$kkm" label-acuan="KKM" />
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="rounded-xl bg-blue-50 px-3 py-2.5">
+                        <div class="text-lg font-bold text-slate-800">{{ $statistik['kehadiran'] !== null ? $statistik['kehadiran'].'%' : '-' }}</div>
+                        <div class="text-xs text-slate-500">Kehadiran</div>
+                    </div>
+                    <div class="rounded-xl bg-blue-50 px-3 py-2.5">
+                        <div class="text-lg font-bold text-slate-800">{{ $kelasTerbaik->first()['kelas']->nama_kelas ?? '-' }}</div>
+                        <div class="text-xs text-slate-500">Kelas terbaik</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="card lg:col-span-2">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Rata-rata Nilai per Kelas</h3>
+                    <p class="text-xs text-slate-500">Batang ungu menandai kelas di bawah KKM</p>
+                </div>
+                <a href="{{ route('kepsek.monitoring.kelas') }}" class="card-link">Rekap Kelas</a>
+            </div>
+            <x-grafik.batang class="h-72 lg:h-96 px-4 pb-5 sm:px-6" :label="$grafik['nilaiKelas']['label']" :nilai="$grafik['nilaiKelas']['nilai']"
+                             nama="Rata-rata nilai" :maks="100" :garis="['label' => 'KKM', 'nilai' => $kkm]" kosong="Belum ada nilai akhir yang direkap guru." />
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Capaian Pembelajaran</h3>
+                    <p class="text-xs text-slate-500">Tahun ajaran aktif</p>
+                </div>
+            </div>
+            <x-grafik.cincin class="px-4 pb-6 sm:px-6" :data="$grafik['capaian']" />
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
         <div class="card">
             <div class="card-header"><h3 class="card-title">Kehadiran Siswa</h3></div>
             <div class="px-4 pb-6 sm:px-6">

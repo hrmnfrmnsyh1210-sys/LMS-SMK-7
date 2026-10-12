@@ -13,12 +13,13 @@ use App\Models\Pengampu;
 use App\Models\Pengumuman;
 use App\Models\Siswa;
 use App\Models\Tugas;
+use App\Services\GrafikService;
 use App\Services\MonitoringSekolahService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(MonitoringSekolahService $monitoring): View
+    public function __invoke(MonitoringSekolahService $monitoring, GrafikService $grafik): View
     {
         $pengampuIds = Pengampu::tahunAktif()->select('id');
         $presensi = $monitoring->komposisiPresensi();
@@ -43,6 +44,12 @@ class DashboardController extends Controller
         return view('kepsek.dashboard', [
             'statistik' => $statistik,
             'grafikPresensi' => $grafikPresensi,
+            'grafik' => [
+                'kehadiran' => $grafik->trenKehadiran(Pengampu::tahunAktif()->pluck('id')),
+                'nilaiKelas' => $grafik->rataNilaiPerKelas(),
+                'capaian' => $grafik->capaian(Pengampu::tahunAktif()->pluck('id')),
+            ],
+            'kkm' => (float) pengaturan('kkm', 75),
             'kelasTerbaik' => $kelas->whereNotNull('rata')->sortByDesc('rata')->take(5)->values(),
             'pengumuman' => Pengumuman::latest()->limit(4)->get(),
             'aktivitasGuru' => LogAktivitas::with('user.guru')
