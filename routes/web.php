@@ -18,6 +18,7 @@ Route::get('/', [WebsiteController::class, 'beranda'])->name('beranda');
 Route::get('berita', [WebsiteController::class, 'berita'])->name('web.berita.index');
 Route::get('berita/{berita:slug}', [WebsiteController::class, 'beritaShow'])->name('web.berita.show');
 Route::get('galeri', [WebsiteController::class, 'galeri'])->name('web.galeri');
+Route::post('tanya-ai', [WebsiteController::class, 'tanyaAi'])->middleware('throttle:ai-publik')->name('web.tanya-ai');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');

@@ -3,10 +3,13 @@
 namespace App\Services;
 
 use App\Exceptions\AiGagalException;
+use App\Models\Berita;
 use App\Models\JawabanKuisDetail;
+use App\Models\Jurusan;
 use App\Models\Kuis;
 use App\Models\Materi;
 use App\Models\Pengampu;
+use App\Models\Pengaturan;
 use App\Models\Siswa;
 use App\Models\Soal;
 use Illuminate\Support\Collection;
@@ -165,6 +168,60 @@ class AsistenAiService
         $pesan[] = ['role' => 'user', 'content' => $pertanyaan];
 
         return $this->ai->chat($pesan, 0.6, 1200);
+    }
+
+    /**
+     * Asisten informasi sekolah untuk pengunjung website (tanpa login). Hanya menjawab dari data publik sekolah.
+     *
+     * @param  list<array{role: string, content: string}>  $riwayat
+     *
+     * @throws AiGagalException
+     */
+    public function tanyaPengunjung(array $riwayat, string $pertanyaan): string
+    {
+        $s = Pengaturan::semua();
+        $baris = fn (string $label, ?string $nilai) => filled($nilai) ? "- {$label}: ".Str::limit(trim($nilai), 1500) : null;
+
+        $jurusan = Jurusan::orderBy('kode')->get(['kode', 'nama', 'deskripsi'])
+            ->map(fn (Jurusan $j) => "- {$j->kode} — {$j->nama}".($j->deskripsi ? ': '.Str::limit($j->deskripsi, 300) : ''))
+            ->implode("\n");
+        $berita = Berita::terbit()->latest('diterbitkan_pada')->limit(5)->get()
+            ->map(fn (Berita $b) => '- '.tanggal_indo($b->diterbitkan_pada, false).': '.$b->judul.' — '.$b->cuplikan(160))
+            ->implode("\n");
+
+        $info = collect([
+            $baris('Nama sekolah', $s['nama_sekolah']),
+            $baris('NPSN', $s['npsn']),
+            $baris('Alamat', $s['alamat_sekolah']),
+            $baris('Telepon', $s['telepon_sekolah']),
+            $baris('Email', $s['email_sekolah']),
+            $baris('WhatsApp', $s['web_whatsapp']),
+            $baris('Akreditasi', $s['web_akreditasi']),
+            $baris('Tahun berdiri', $s['web_tahun_berdiri']),
+            $baris('Visi', $s['web_visi']),
+            $baris('Misi', $s['web_misi']),
+            $baris('Sejarah', $s['web_sejarah']),
+            $s['web_ppdb_aktif'] === '1'
+                ? '- PPDB: SEDANG DIBUKA. '.$s['web_ppdb_judul'].'. '.$s['web_ppdb_teks'].($s['web_ppdb_tautan'] ? ' Pendaftaran: '.$s['web_ppdb_tautan'] : '')
+                : '- PPDB: belum dibuka saat ini.',
+        ])->filter()->implode("\n");
+
+        $sistem = "Anda \"Asisten {$s['nama_sekolah']}\", petugas informasi yang ramah di website resmi sekolah. "
+            .'Jawab dalam Bahasa Indonesia yang singkat (maks. 4 kalimat atau poin), sopan, dan jelas. '
+            .'Gunakan HANYA informasi di bawah. Bila informasinya tidak ada, katakan terus terang dan sarankan menghubungi sekolah lewat kontak yang tersedia. '
+            .'Jangan mengarang biaya, tanggal, kuota, atau nama orang. Tolak dengan sopan pertanyaan di luar urusan sekolah. '
+            .'Siswa, guru, dan orang tua bisa masuk ke LMS lewat tombol "Masuk LMS".'
+            ."\n\nINFORMASI SEKOLAH:\n{$info}"
+            .($jurusan ? "\n\nPROGRAM KEAHLIAN:\n{$jurusan}" : '')
+            .($berita ? "\n\nBERITA & AGENDA TERBARU:\n{$berita}" : '');
+
+        $pesan = [['role' => 'system', 'content' => $sistem]];
+        foreach (array_slice($riwayat, -8) as $r) {
+            $pesan[] = ['role' => $r['role'], 'content' => Str::limit($r['content'], 1500)];
+        }
+        $pesan[] = ['role' => 'user', 'content' => $pertanyaan];
+
+        return $this->ai->chat($pesan, 0.3, 600);
     }
 
     /** Markdown dari AI → HTML aman (tag HTML mentah dibuang). */

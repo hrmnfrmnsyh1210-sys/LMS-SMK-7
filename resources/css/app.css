@@ -312,3 +312,35 @@
         @apply bg-transparent p-0 text-slate-100;
     }
 }
+
+/* Bubble chat AI website: blob yang berubah bentuk perlahan dan titik yang mengorbit. */
+@keyframes blob-morph {
+    0%, 100% { border-radius: 42% 58% 62% 38% / 45% 42% 58% 55%; }
+    33% { border-radius: 58% 42% 40% 60% / 55% 60% 40% 45%; }
+    66% { border-radius: 38% 62% 55% 45% / 62% 38% 62% 38%; }
+}
+
+@keyframes orbit {
+    to { transform: rotate(360deg); }
+}
+
+.bubble-blob {
+    border-radius: 42% 58% 62% 38% / 45% 42% 58% 55%;
+    animation: blob-morph 7s ease-in-out infinite;
+}
+
+.bubble-blob-lambat {
+    animation-duration: 11s;
+    animation-direction: reverse;
+}
+
+.bubble-orbit {
+    animation: orbit 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble-blob,
+    .bubble-orbit {
+        animation: none;
+    }
+}

@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Permintaan ke layanan AI berbayar dibatasi per pengguna.
         RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
+        // Chat pengunjung website (tanpa login) dibatasi lebih ketat per IP.
+        RateLimiter::for('ai-publik', fn (Request $request) => [
+            Limit::perMinute(5)->by('menit:'.$request->ip()),
+            Limit::perDay(40)->by('hari:'.$request->ip()),
+        ]);
 
         View::composer('*', function ($view) {
             try {

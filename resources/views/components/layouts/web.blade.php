@@ -26,6 +26,7 @@
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ? $title.' — ' : '' }}{{ $sekolah['nama_sekolah'] }}</title>
     @if ($deskripsi)
@@ -107,6 +108,10 @@
 
     {{-- ================= FOOTER ================= --}}
     @include('web.footer')
+
+    @if (filled(config('services.ai.key')))
+        @include('web.chat-ai')
+    @endif
 
     @stack('scripts')
 </body>
