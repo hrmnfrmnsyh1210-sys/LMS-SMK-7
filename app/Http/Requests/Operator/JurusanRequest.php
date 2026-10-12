@@ -17,6 +17,7 @@ class JurusanRequest extends FormRequest
         return [
             'kode' => ['required', 'string', 'max:20', Rule::unique('jurusan', 'kode')->ignore($this->route('jurusan'))],
             'nama' => ['required', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string', 'max:1000'],
         ];
     }
 

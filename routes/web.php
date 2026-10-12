@@ -9,9 +9,14 @@ use App\Http\Controllers\Operator;
 use App\Http\Controllers\Ortu;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\Siswa;
+use App\Http\Controllers\WebsiteController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
+// Website profil sekolah (publik).
+Route::get('/', [WebsiteController::class, 'beranda'])->name('beranda');
+Route::get('berita', [WebsiteController::class, 'berita'])->name('web.berita.index');
+Route::get('berita/{berita:slug}', [WebsiteController::class, 'beritaShow'])->name('web.berita.show');
+Route::get('galeri', [WebsiteController::class, 'galeri'])->name('web.galeri');
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
@@ -77,6 +82,12 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::post('kenaikan-kelas/proses', [Operator\KenaikanKelasController::class, 'proses'])->name('kenaikan-kelas.proses');
             Route::get('pergantian-tahun-ajaran', [Operator\PergantianTahunAjaranController::class, 'index'])->name('pergantian-tahun-ajaran.index');
             Route::post('pergantian-tahun-ajaran', [Operator\PergantianTahunAjaranController::class, 'store'])->name('pergantian-tahun-ajaran.store');
+
+            // Website sekolah
+            Route::get('website', [Operator\KontenWebsiteController::class, 'edit'])->name('website.edit');
+            Route::put('website', [Operator\KontenWebsiteController::class, 'update'])->name('website.update');
+            Route::resource('berita', Operator\BeritaController::class)->except('show')->parameters(['berita' => 'berita']);
+            Route::resource('galeri', Operator\GaleriController::class)->except('show')->parameters(['galeri' => 'galeri']);
 
             // Log & backup
             Route::get('log-aktivitas', [Operator\LogAktivitasController::class, 'index'])->name('log.index');

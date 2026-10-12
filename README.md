@@ -12,7 +12,7 @@ Teknologi: Laravel 13 (PHP ≥ 8.3), MySQL/MariaDB, Blade + Tailwind CSS v4 + Al
 | 2 | Fitur Guru (kelas ajar, materi, tugas, kuis PG+esai, presensi, nilai, forum, pengumuman, monitoring & ranking, wali kelas + surat izin) | ✅ Selesai |
 | 3 | Fitur Siswa (mapel & materi, tugas, kuis dengan timer/autosave, jadwal, presensi, nilai, forum, surat izin, pengumuman) & Kepala Sekolah (dashboard, keaktifan guru, rekap kelas, pengumuman sekolah) | ✅ Selesai |
 | 3b | Role Orang Tua (akun per anak/kakak-adik, pantau nilai, presensi, tugas, kuis, jadwal, pengumuman, surat izin) | ✅ Selesai |
-| 4 | Pengujian lanjutan, halaman error, panduan deployment | Belum |
+| 4 | Pengujian lanjutan, halaman error, header keamanan, penjadwal otomatis, panduan deployment ([DEPLOYMENT.md](DEPLOYMENT.md)) | ✅ Selesai |
 
 ## Instalasi lokal
 
@@ -89,6 +89,15 @@ Tabel baru `orang_tua` dan pivot `orang_tua_siswa` (satu akun dapat memantau beb
 - **Pantau anak** (anak yang dipilih disimpan di session): nilai, presensi, status tugas, hasil kuis (hanya bila guru menampilkan hasil), jadwal. Semuanya baca-saja.
 - **Surat izin:** orang tua dapat mengajukan izin/sakit untuk anaknya; wali kelas melihat nama pengaju. Orang tua dan siswa sama-sama diberi notifikasi saat surat diproses.
 - **Pengumuman:** orang tua melihat pengumuman untuk semua, untuk orang tua, dan untuk kelas anaknya; pengumuman kelas dari guru juga dikirim ke orang tua siswa kelas tersebut.
+- **Notifikasi alpa:** orang tua diberi tahu saat anaknya baru tercatat alpa (menyimpan ulang presensi tidak mengirim notifikasi ganda).
+
+## Kesiapan produksi (Fase 4)
+
+- **Halaman error** 403, 404, 419, 429, 500, 503 berbahasa Indonesia (`resources/views/errors`), mandiri tanpa Vite/database agar tetap tampil saat aplikasi bermasalah.
+- **Header keamanan** (`HeaderKeamanan` middleware): `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, dan HSTS bila HTTPS.
+- **Penjadwal** (`routes/console.php`, butuh satu cron per menit): `lms:tutup-kuis` tiap 5 menit dan `lms:bersihkan-notifikasi` harian.
+- **Test alur lintas role** guru → siswa → orang tua → wali kelas (`tests/Feature/Fase3AlurSiswaOrtuTest.php`).
+- **Panduan deployment** shared hosting: [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Catatan skema
 

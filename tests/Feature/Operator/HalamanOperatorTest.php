@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Operator;
 
+use App\Models\Berita;
+use App\Models\Galeri;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Jurusan;
@@ -54,6 +56,10 @@ class HalamanOperatorTest extends TestCase
             route('operator.kenaikan-kelas.index', ['sumber_id' => TahunAjaran::aktifId(), 'tujuan_id' => $tahunLama->id]),
             route('operator.log.index'), route('operator.log.index', ['aksi' => 'login', 'dari' => now()->toDateString()]),
             route('operator.backup.index'),
+            route('operator.website.edit'),
+            route('operator.berita.index'), route('operator.berita.index', ['q' => 'a', 'kategori' => 'prestasi']),
+            route('operator.berita.create'), route('operator.berita.edit', Berita::first()),
+            route('operator.galeri.index'), route('operator.galeri.create'), route('operator.galeri.edit', Galeri::factory()->create()),
         ];
 
         foreach ($halaman as $url) {

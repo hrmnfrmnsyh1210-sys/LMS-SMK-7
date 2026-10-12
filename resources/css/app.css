@@ -14,18 +14,33 @@
 @theme {
     --font-sans: 'Poppins', 'Inter', ui-sans-serif, system-ui, sans-serif;
     --color-latar: #f6f8fc;
-    --gradasi-sidebar: linear-gradient(to bottom, #5f78c2, #7591d6 55%, #93aee6);
 
-    --color-blue-50: #f3f6fd;
-    --color-blue-100: #e6edfa;
-    --color-blue-200: #d0dcf4;
-    --color-blue-300: #b0c4ec;
-    --color-blue-400: #8ea8e0;
-    --color-blue-500: #7290d6;
-    --color-blue-600: #5b78c6;
-    --color-blue-700: #4d66ad;
-    --color-blue-800: #42568d;
-    --color-blue-900: #3a4a72;
+    /* Website publik: judul serif, biru tua institusional, aksen kuning. */
+    --font-display: 'Roboto Slab', Georgia, ui-serif, serif;
+    --color-navy-600: #1a4fa3;
+    --color-navy-700: #103f8a;
+    --color-navy-800: #0b316e;
+    --color-navy-900: #08224d;
+    --color-navy-950: #051633;
+    --color-kuning-300: #fdd977;
+    --color-kuning-400: #fbc63d;
+    --color-kuning-500: #f4b11a;
+    /* Sidebar gelap senada website publik; aksen = penanda menu aktif. */
+    --gradasi-sidebar: linear-gradient(180deg, #0d3577 0%, #08224d 55%, #051633 100%);
+    --color-aksen: #fbc63d;
+    --color-sidebar: #0a2a5e;
+
+    /* Skala biru utama (operator, guru, kepsek) bernuansa navy seperti website. */
+    --color-blue-50: #f1f5fb;
+    --color-blue-100: #e1e9f6;
+    --color-blue-200: #c5d4ee;
+    --color-blue-300: #9bb5e0;
+    --color-blue-400: #6b8fcc;
+    --color-blue-500: #4471b8;
+    --color-blue-600: #2a58a3;
+    --color-blue-700: #1f4688;
+    --color-blue-800: #17386e;
+    --color-blue-900: #102a55;
 
     --color-red-50: #fdf4f4;
     --color-red-100: #fbe6e6;
@@ -57,7 +72,9 @@
  */
 [data-tema='siswa'] {
     --color-latar: #faf7ff;
-    --gradasi-sidebar: linear-gradient(160deg, #8f7be0, #b18ef0 50%, #eaa2cf);
+    --gradasi-sidebar: linear-gradient(180deg, #3d2c80 0%, #2a1d5c 55%, #1b1240 100%);
+    --color-aksen: #f0b4d3;
+    --color-sidebar: #2b1e60;
 
     --color-blue-50: #f7f3ff;
     --color-blue-100: #eee7fd;
@@ -74,7 +91,9 @@
 /* Tema orang tua: teal lembut yang tenang. */
 [data-tema='ortu'] {
     --color-latar: #f4f9f8;
-    --gradasi-sidebar: linear-gradient(to bottom, #4f9a92, #6db8b0 55%, #95cfc8);
+    --gradasi-sidebar: linear-gradient(180deg, #1f5c56 0%, #164541 55%, #0e2f2c 100%);
+    --color-aksen: #fbc63d;
+    --color-sidebar: #174a45;
 
     --color-blue-50: #f0f8f7;
     --color-blue-100: #dcf0ed;
@@ -138,6 +157,29 @@
         background-image: var(--gradasi-sidebar);
     }
 
+    /* Scrollbar tipis untuk menu sidebar gelap. */
+    /* Tombol di atas banner sapaan gelap. */
+    .banner-sapaan .btn-primary {
+        @apply bg-aksen text-slate-900 shadow-none hover:bg-white;
+    }
+
+    .banner-sapaan .btn-secondary {
+        @apply border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20 hover:text-white;
+    }
+
+    .sidebar-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-white/20;
+    }
+
     .card-body {
         @apply p-4 sm:p-6;
     }
@@ -197,5 +239,42 @@
 
     .link {
         @apply font-medium text-blue-600 hover:text-blue-800 hover:underline;
+    }
+
+    /* Isi berita (hasil Markdown) di website publik. */
+    .konten-artikel {
+        @apply space-y-5 text-base leading-relaxed text-slate-600 sm:text-lg;
+    }
+
+    .konten-artikel h2 {
+        @apply pt-4 text-xl font-bold text-slate-800 sm:text-2xl;
+    }
+
+    .konten-artikel h3 {
+        @apply pt-2 text-lg font-semibold text-slate-800;
+    }
+
+    .konten-artikel a {
+        @apply font-medium text-navy-700 underline hover:text-navy-900;
+    }
+
+    .konten-artikel ul {
+        @apply list-disc space-y-1.5 pl-6;
+    }
+
+    .konten-artikel ol {
+        @apply list-decimal space-y-1.5 pl-6;
+    }
+
+    .konten-artikel blockquote {
+        @apply border-l-4 border-kuning-400 bg-kuning-300/20 py-3 pr-4 pl-5 text-slate-700 italic;
+    }
+
+    .konten-artikel img {
+        @apply rounded-2xl;
+    }
+
+    .konten-artikel strong {
+        @apply font-semibold text-slate-800;
     }
 }

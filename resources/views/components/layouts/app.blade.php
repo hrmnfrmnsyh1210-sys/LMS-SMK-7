@@ -30,70 +30,91 @@
         <link rel="icon" href="{{ $logo }}">
     @endif
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=poppins:400,500,600,700|roboto-slab:600,700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
 <body class="bg-latar font-sans text-slate-800 antialiased" data-tema="{{ $user->role }}"
-      x-data="{ sidebar: false, ciut: localStorage.getItem('sidebar-ciut') === '1' }"
-      x-init="$watch('ciut', v => localStorage.setItem('sidebar-ciut', v ? '1' : '0'))">
+      x-data="{
+          sidebar: false,
+          ciut: localStorage.getItem('sidebar-ciut') === '1',
+          tip: null,
+          tunjuk(el, teks) {
+              if (! this.ciut || window.innerWidth < 1024) return;
+              const r = el.getBoundingClientRect();
+              this.tip = { teks, y: r.top + r.height / 2 };
+          },
+      }"
+      x-init="$watch('ciut', v => { tip = null; localStorage.setItem('sidebar-ciut', v ? '1' : '0') })">
 
     {{-- Overlay drawer (HP) --}}
     <div x-show="sidebar" x-cloak x-transition.opacity class="fixed inset-0 z-30 bg-slate-900/30 backdrop-blur-sm lg:hidden" @click="sidebar = false"></div>
 
     {{-- ================= SIDEBAR ================= --}}
-    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-sidebar lg:translate-x-0 transition-transform duration-200"
-           :class="{ 'translate-x-0': sidebar, 'lg:-translate-x-full!': ciut }">
+    {{-- Desktop: lebar penuh (w-64) atau rel ikon (w-20) saat diciutkan. HP: laci geser. --}}
+    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col overflow-hidden bg-sidebar text-white shadow-xl shadow-slate-900/10 transition-[width,translate] duration-200 lg:translate-x-0"
+           :class="{ 'translate-x-0': sidebar, 'lg:w-20': ciut }">
         {{-- Identitas sekolah --}}
-        <a href="{{ route('dashboard') }}" class="flex flex-col items-center px-5 pt-7 pb-6 text-center text-white">
+        <a href="{{ route('dashboard') }}" class="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 px-5" :class="ciut && 'lg:justify-center lg:px-0'">
             @if ($logo)
-                <img src="{{ $logo }}" alt="Logo" class="mb-3 h-14 w-14 rounded-xl bg-white object-contain p-1 shadow-lg shadow-blue-900/20">
+                <img src="{{ $logo }}" alt="Logo" class="h-10 w-10 shrink-0 object-contain">
             @else
-                <x-icon name="academic-cap" class="mb-2 h-12 w-12" />
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-aksen"><x-icon name="academic-cap" class="h-6 w-6" /></span>
             @endif
-            <div class="text-xl leading-tight font-bold tracking-wide">{{ $sekolah['nama_sekolah'] }}</div>
-            <div class="mt-1 text-xs text-blue-100">Learning Management System</div>
+            <span class="min-w-0 leading-tight whitespace-nowrap" :class="ciut && 'lg:hidden'">
+                <span class="block truncate font-display text-base font-bold">{{ $sekolah['nama_sekolah'] }}</span>
+                <span class="block text-[10px] font-medium tracking-[0.18em] text-white/50 uppercase">Learning Management</span>
+            </span>
         </a>
 
-        {{-- Panel menu putih --}}
-        <div class="ml-1.5 flex min-h-0 flex-1 flex-col rounded-tl-3xl bg-white">
-            <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-5 text-sm">
-                @foreach ($menu as $item)
-                    @if (isset($item['judul']))
-                        <div class="px-3 pt-4 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">{{ $item['judul'] }}</div>
-                    @else
-                        @php $aktif = request()->routeIs(...(array) ($item['aktif'] ?? $item['route'])); @endphp
-                        <a href="{{ route($item['route']) }}"
-                           @class([
-                               'flex items-center gap-3 rounded-xl px-3.5 py-2.5 font-medium transition',
-                               'bg-blue-600 text-white shadow-md shadow-blue-600/25' => $aktif && $user->role !== 'siswa',
-                               'bg-linear-to-r from-blue-500 to-pink-400 text-white shadow-md shadow-blue-500/25' => $aktif && $user->role === 'siswa',
-                               'text-slate-600 hover:bg-blue-50 hover:text-blue-700' => ! $aktif,
-                           ])>
-                            <x-icon :name="$item['ikon']" class="h-5 w-5 shrink-0" />
-                            <span class="truncate">{{ $item['label'] }}</span>
-                        </a>
-                    @endif
-                @endforeach
-            </nav>
+        <nav class="sidebar-scroll flex-1 space-y-0.5 overflow-x-hidden overflow-y-auto px-3 py-4 text-sm" @scroll="tip = null">
+            @foreach ($menu as $item)
+                @if (isset($item['judul']))
+                    <div class="px-3 pt-5 pb-2 text-[10px] font-semibold tracking-[0.18em] whitespace-nowrap text-white/40 uppercase" :class="ciut && 'lg:hidden'">{{ $item['judul'] }}</div>
+                    <div class="mx-2 my-3 hidden border-t border-white/10" :class="ciut && 'lg:block'"></div>
+                @else
+                    @php $aktif = request()->routeIs(...(array) ($item['aktif'] ?? $item['route'])); @endphp
+                    <a href="{{ route($item['route']) }}" aria-label="{{ $item['label'] }}" @if ($aktif) aria-current="page" @endif
+                       @mouseenter="tunjuk($el, @js($item['label']))" @mouseleave="tip = null"
+                       :class="ciut && 'lg:justify-center lg:px-0'"
+                       @class([
+                           'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition',
+                           'bg-white/10 text-white before:absolute before:inset-y-2 before:-left-3 before:w-1 before:rounded-r-full before:bg-aksen' => $aktif,
+                           'text-white/65 hover:bg-white/5 hover:text-white' => ! $aktif,
+                       ])>
+                        <x-icon :name="$item['ikon']" class="h-5 w-5 shrink-0 transition {{ $aktif ? 'text-aksen' : 'text-white/50 group-hover:text-white' }}" />
+                        <span class="truncate whitespace-nowrap" :class="ciut && 'lg:hidden'">{{ $item['label'] }}</span>
+                    </a>
+                @endif
+            @endforeach
+        </nav>
 
-            <div class="border-t border-slate-100 p-3">
-                <div class="mb-2 rounded-xl bg-blue-50 px-3.5 py-2.5 text-xs text-slate-500">
-                    Tahun ajaran aktif<br>
-                    <span class="font-semibold text-blue-700">{{ $tahunAktif?->label ?? 'Belum diatur' }}</span>
+        <div class="space-y-1 border-t border-white/10 p-3">
+            <div class="flex items-center gap-3 rounded-lg bg-white/5 px-3 py-2.5" :class="ciut && 'lg:justify-center lg:px-0'"
+                 @mouseenter="tunjuk($el, @js('Tahun ajaran: '.($tahunAktif?->label ?? 'belum diatur')))" @mouseleave="tip = null">
+                <x-icon name="calendar" class="h-5 w-5 shrink-0 text-aksen" />
+                <div class="min-w-0 leading-tight whitespace-nowrap" :class="ciut && 'lg:hidden'">
+                    <div class="text-[10px] font-medium tracking-[0.15em] text-white/45 uppercase">Tahun ajaran aktif</div>
+                    <div class="truncate text-sm font-semibold">{{ $tahunAktif?->label ?? 'Belum diatur' }}</div>
                 </div>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50">
-                        <x-icon name="logout" class="h-5 w-5" /> Keluar
-                    </button>
-                </form>
             </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" aria-label="Keluar" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/65 transition hover:bg-red-500/15 hover:text-red-200"
+                        :class="ciut && 'lg:justify-center lg:px-0'" @mouseenter="tunjuk($el, 'Keluar')" @mouseleave="tip = null">
+                    <x-icon name="logout" class="h-5 w-5 shrink-0" /> <span :class="ciut && 'lg:hidden'">Keluar</span>
+                </button>
+            </form>
         </div>
     </aside>
 
+    {{-- Tooltip nama menu saat sidebar diciutkan (di luar aside agar tidak terpotong). --}}
+    <div x-show="tip" x-cloak x-transition.opacity.duration.100ms
+         class="pointer-events-none fixed left-22 z-50 hidden -translate-y-1/2 rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white shadow-lg lg:block"
+         :style="tip && { top: tip.y + 'px' }" x-text="tip?.teks"></div>
+
     {{-- ================= KONTEN ================= --}}
-    <div class="flex min-h-screen flex-col transition-[padding] duration-200 lg:pl-64" :class="ciut && 'lg:pl-0!'">
+    <div class="flex min-h-screen flex-col transition-[padding] duration-200 lg:pl-64" :class="ciut && 'lg:pl-20!'">
         {{-- Topbar --}}
         <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-100 bg-white px-4 sm:px-6">
             <button type="button" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
@@ -101,7 +122,7 @@
                 <x-icon name="menu" class="h-6 w-6" />
             </button>
 
-            <h1 class="truncate text-lg font-semibold text-slate-800">{{ $title }}</h1>
+            <h1 class="truncate font-display text-lg font-bold text-slate-900">{{ $title }}</h1>
 
             <div class="ml-auto flex items-center gap-2 sm:gap-4">
                 @if ($user->role === 'operator')
@@ -137,7 +158,7 @@
                 {{-- Profil --}}
                 <div class="relative" x-data="{ buka: false }" @click.outside="buka = false">
                     <button type="button" class="flex items-center gap-3 rounded-xl py-1 pr-1 pl-1 hover:bg-slate-50 sm:pr-3" @click="buka = !buka">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-blue-700 text-sm font-semibold text-white ring-2 ring-blue-100">{{ $inisial }}</span>
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sidebar text-sm font-semibold text-white ring-2 ring-blue-100">{{ $inisial }}</span>
                         <span class="hidden text-left sm:block">
                             <span class="block max-w-48 truncate text-sm font-semibold text-slate-800">Halo, {{ $user->nama }}</span>
                             <span class="block max-w-48 truncate text-xs text-slate-500">{{ $keteranganUser }}</span>

@@ -20,7 +20,6 @@ class LoginTest extends TestCase
     public function test_tamu_diarahkan_ke_login(): void
     {
         $this->get('/operator')->assertRedirect('/login');
-        $this->get('/')->assertRedirect('/login');
     }
 
     public static function daftarRole(): array

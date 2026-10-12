@@ -12,7 +12,7 @@ class Jurusan extends Model
 
     protected $table = 'jurusan';
 
-    protected $fillable = ['kode', 'nama'];
+    protected $fillable = ['kode', 'nama', 'deskripsi'];
 
     public function kelas(): HasMany
     {

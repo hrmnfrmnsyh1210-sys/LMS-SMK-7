@@ -22,6 +22,32 @@ class Pengaturan extends Model
         'logo' => '',
         'min_panjang_password' => '8',
         'kkm' => '75',
+
+        // Konten website profil sekolah (landing page).
+        'web_hero_judul' => 'Sekolah Vokasi Unggul, Siap Kerja dan Berkarakter',
+        'web_hero_subjudul' => 'Mencetak lulusan kompeten, kreatif, dan berakhlak mulia yang siap bersaing di dunia industri.',
+        'web_nama_singkat' => '',
+        'web_hero_objek' => '',
+        'web_video_profil' => '',
+        'web_hero_latar' => '',
+        'web_tahun_berdiri' => '',
+        'web_akreditasi' => '',
+        'web_sambutan_nama' => '',
+        'web_sambutan_foto' => '',
+        'web_sambutan_isi' => '',
+        'web_visi' => '',
+        'web_misi' => '',
+        'web_sejarah' => '',
+        'web_ppdb_aktif' => '0',
+        'web_ppdb_judul' => 'Penerimaan Peserta Didik Baru',
+        'web_ppdb_teks' => '',
+        'web_ppdb_tautan' => '',
+        'web_maps_embed' => '',
+        'web_whatsapp' => '',
+        'web_instagram' => '',
+        'web_facebook' => '',
+        'web_youtube' => '',
+        'web_tiktok' => '',
     ];
 
     /** Memo per request agar tidak membaca cache berulang kali. */

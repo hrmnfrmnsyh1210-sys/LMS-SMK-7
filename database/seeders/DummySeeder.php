@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Berita;
 use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Jurusan;
@@ -59,9 +60,9 @@ class DummySeeder extends Seeder
 
         // Jurusan
         $jurusan = collect([
-            ['kode' => 'RPL', 'nama' => 'Rekayasa Perangkat Lunak'],
-            ['kode' => 'TKJ', 'nama' => 'Teknik Komputer dan Jaringan'],
-            ['kode' => 'AKL', 'nama' => 'Akuntansi dan Keuangan Lembaga'],
+            ['kode' => 'RPL', 'nama' => 'Rekayasa Perangkat Lunak', 'deskripsi' => 'Mempelajari pemrograman web dan mobile, basis data, serta pengembangan aplikasi sesuai kebutuhan industri.'],
+            ['kode' => 'TKJ', 'nama' => 'Teknik Komputer dan Jaringan', 'deskripsi' => 'Merakit dan merawat komputer, membangun jaringan, administrasi server, dan keamanan jaringan.'],
+            ['kode' => 'AKL', 'nama' => 'Akuntansi dan Keuangan Lembaga', 'deskripsi' => 'Menyusun laporan keuangan, perpajakan, dan mengoperasikan aplikasi akuntansi untuk perusahaan maupun lembaga.'],
         ])->mapWithKeys(fn ($j) => [$j['kode'] => Jurusan::create($j)]);
 
         // Mapel
@@ -147,6 +148,37 @@ class DummySeeder extends Seeder
         }
 
         $this->buatJadwal($kelas, $pengampuPerKelas);
+        $this->buatKontenWebsite();
+    }
+
+    /** Contoh isi website profil sekolah dan beberapa berita terbit. */
+    private function buatKontenWebsite(): void
+    {
+        $konten = [
+            'telepon_sekolah' => '(021) 555-0707',
+            'email_sekolah' => 'info@smkn7.sch.id',
+            'web_tahun_berdiri' => '1998',
+            'web_akreditasi' => 'A',
+            'web_sambutan_isi' => "Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa atas terbitnya website resmi sekolah kami.\n\n"
+                .'Website ini kami hadirkan sebagai sarana informasi bagi siswa, orang tua, dan masyarakat. Semoga dapat memberi gambaran tentang program dan kegiatan sekolah kami.',
+            'web_visi' => 'Menjadi sekolah vokasi unggul yang menghasilkan lulusan kompeten, berkarakter, dan berdaya saing global.',
+            'web_misi' => implode("\n", [
+                'Menyelenggarakan pembelajaran berbasis industri',
+                'Membentuk karakter religius dan disiplin',
+                'Menjalin kemitraan dengan dunia usaha dan industri',
+                'Mengembangkan budaya literasi dan teknologi',
+            ]),
+            'web_sejarah' => 'Sekolah ini didirikan pada tahun 1998 dengan dua program keahlian dan terus berkembang hingga kini memiliki tiga program keahlian dengan fasilitas praktik yang lengkap.',
+            'web_ppdb_aktif' => '1',
+            'web_ppdb_teks' => 'Pendaftaran peserta didik baru tahun ajaran 2027/2028 dibuka mulai 1 Mei 2027.',
+        ];
+        foreach ($konten as $kunci => $nilai) {
+            Pengaturan::simpan($kunci, $nilai);
+        }
+
+        $operatorId = User::where('username', 'operator')->value('id');
+        Berita::factory()->count(5)->create(['penulis_user_id' => $operatorId]);
+        Berita::factory()->draf()->create(['penulis_user_id' => $operatorId]);
     }
 
     /** Jadwal satu sesi per pengampu per minggu, dijamin tidak bentrok. */

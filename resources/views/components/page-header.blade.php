@@ -2,7 +2,7 @@
 
 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
     <div>
-        <h2 class="text-xl font-semibold text-slate-800">{{ $title }}</h2>
+        <h2 class="font-display text-2xl font-bold text-slate-900">{{ $title }}</h2>
         @if ($subtitle)
             <p class="mt-0.5 text-sm text-slate-500">{{ $subtitle }}</p>
         @endif

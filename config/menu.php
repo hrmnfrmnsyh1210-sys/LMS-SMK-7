@@ -27,6 +27,11 @@ return [
         ['label' => 'Wali Kelas', 'route' => 'operator.wali-kelas.index', 'aktif' => 'operator.wali-kelas.*', 'ikon' => 'star'],
         ['label' => 'Jadwal', 'route' => 'operator.jadwal.index', 'aktif' => 'operator.jadwal.*', 'ikon' => 'clock'],
 
+        ['judul' => 'Website'],
+        ['label' => 'Konten Halaman', 'route' => 'operator.website.edit', 'aktif' => 'operator.website.*', 'ikon' => 'sparkles'],
+        ['label' => 'Berita & Agenda', 'route' => 'operator.berita.index', 'aktif' => 'operator.berita.*', 'ikon' => 'megaphone'],
+        ['label' => 'Galeri', 'route' => 'operator.galeri.index', 'aktif' => 'operator.galeri.*', 'ikon' => 'photo'],
+
         ['judul' => 'Sistem'],
         ['label' => 'Pengaturan Sekolah', 'route' => 'operator.pengaturan.edit', 'aktif' => 'operator.pengaturan.*', 'ikon' => 'cog'],
         ['label' => 'Pergantian Tahun Ajaran', 'route' => 'operator.pergantian-tahun-ajaran.index', 'aktif' => 'operator.pergantian-tahun-ajaran.*', 'ikon' => 'refresh'],

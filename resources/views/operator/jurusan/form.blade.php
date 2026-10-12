@@ -10,6 +10,8 @@
 
         <x-field.input name="kode" label="Kode" :value="$jurusan->kode" placeholder="RPL" required />
         <x-field.input name="nama" label="Nama jurusan" :value="$jurusan->nama" placeholder="Rekayasa Perangkat Lunak" required />
+        <x-field.textarea name="deskripsi" label="Deskripsi singkat" :value="$jurusan->deskripsi" rows="4"
+                          help="Ditampilkan pada bagian Program Keahlian di website sekolah." />
 
         <x-form-actions :batal="route('operator.jurusan.index')" />
     </form>

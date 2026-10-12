@@ -6,9 +6,11 @@ use App\Models\Pengampu;
 use App\Models\Presensi;
 use App\Models\Siswa;
 use App\Models\SuratIzin;
+use App\Notifications\Pemberitahuan;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class PresensiService
 {
@@ -34,10 +36,15 @@ class PresensiService
         ])->all();
     }
 
-    /** @param array<int|string, string> $status siswa_id => status */
+    /**
+     * Simpan presensi satu pertemuan. Orang tua siswa yang baru tercatat alpa diberi notifikasi.
+     *
+     * @param  array<int|string, string>  $status  siswa_id => status
+     */
     public function simpan(Pengampu $pengampu, int $pertemuan, string $tanggal, array $status): void
     {
         $siswaValid = $pengampu->daftarSiswa()->pluck('id')->all();
+        $statusLama = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->pluck('status', 'siswa_id');
 
         DB::transaction(function () use ($pengampu, $pertemuan, $tanggal, $status, $siswaValid) {
             foreach ($status as $siswaId => $nilai) {
@@ -53,6 +60,32 @@ class PresensiService
 
             // Tanggal pertemuan disamakan untuk semua siswa.
             Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->update(['tanggal' => $tanggal]);
+        });
+
+        $baruAlpa = collect($status)
+            ->filter(fn ($nilai, $siswaId) => $nilai === 'alpa' && ($statusLama[$siswaId] ?? null) !== 'alpa'
+                && in_array((int) $siswaId, $siswaValid, true))
+            ->keys();
+
+        $this->beriTahuOrtuAlpa($pengampu, $pertemuan, $tanggal, $baruAlpa->map(fn ($id) => (int) $id)->all());
+    }
+
+    /** @param list<int> $siswaIds */
+    private function beriTahuOrtuAlpa(Pengampu $pengampu, int $pertemuan, string $tanggal, array $siswaIds): void
+    {
+        if ($siswaIds === []) {
+            return;
+        }
+
+        $pengampu->loadMissing('mapel');
+        Siswa::with('orangTua.user')->whereIn('id', $siswaIds)->get()->each(function (Siswa $siswa) use ($pengampu, $pertemuan, $tanggal) {
+            Notification::send(
+                $siswa->orangTua->pluck('user')->filter(),
+                new Pemberitahuan(
+                    "{$siswa->nama} tercatat alpa pada {$pengampu->mapel->nama_mapel} pertemuan {$pertemuan} (".tanggal_indo($tanggal, false).').',
+                    route('ortu.presensi'),
+                ),
+            );
         });
     }
 
