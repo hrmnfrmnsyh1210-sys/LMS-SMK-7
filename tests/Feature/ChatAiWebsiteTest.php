@@ -67,6 +67,6 @@ class ChatAiWebsiteTest extends TestCase
         $this->get(route('beranda'))->assertOk()->assertDontSee('Buka Asisten');
 
         config(['services.ai.key' => 'kunci-uji']);
-        $this->get(route('beranda'))->assertOk()->assertSee('Buka Asisten Sekolah');
+        $this->get(route('beranda'))->assertOk()->assertSee('Buka Asisten');
     }
 }

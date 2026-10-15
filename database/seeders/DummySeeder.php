@@ -36,22 +36,19 @@ class DummySeeder extends Seeder
     {
         fake()->seed(2026);
 
-        Pengaturan::simpan('nama_sekolah', 'SMK Negeri 7');
-        Pengaturan::simpan('alamat_sekolah', 'Jl. Pendidikan No. 7');
-        Pengaturan::simpan('npsn', '20212345');
         foreach (Pengaturan::DEFAULT as $kunci => $nilai) {
             Pengaturan::firstOrCreate(['kunci' => $kunci], ['nilai' => $nilai]);
         }
 
         // Akun operator & kepala sekolah
         User::factory()->create(['username' => 'operator', 'role' => 'operator'])
-            ->operator()->create(['nama' => 'Operator Sekolah', 'no_hp' => '081200000001']);
+            ->operator()->create(['nama' => 'Eka Kurniawan', 'no_hp' => '081200000001']);
 
         Kepsek::factory()->create([
             'user_id' => User::factory()->create(['username' => 'kepsek', 'role' => 'kepsek'])->id,
-            'nip' => '197001011995031001',
-            'nama' => 'Drs. Hadi Prasetyo, M.Pd.',
-            'jenis_kelamin' => 'L',
+            'nip' => '197001011995032001',
+            'nama' => 'Uray Ida Nuryanti',
+            'jenis_kelamin' => 'P',
         ]);
 
         // Tahun ajaran
@@ -155,8 +152,7 @@ class DummySeeder extends Seeder
     private function buatKontenWebsite(): void
     {
         $konten = [
-            'telepon_sekolah' => '(021) 555-0707',
-            'email_sekolah' => 'info@smkn7.sch.id',
+            'web_whatsapp' => '082157868679',
             'web_tahun_berdiri' => '1998',
             'web_akreditasi' => 'A',
             'web_sambutan_isi' => "Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa atas terbitnya website resmi sekolah kami.\n\n"

@@ -23,7 +23,7 @@ class ProduksiSeeder extends Seeder
                 // Wajib ganti password saat login pertama.
                 'wajib_ganti_password' => true,
             ]);
-            $user->operator()->create(['nama' => 'Operator Sekolah']);
+            $user->operator()->create(['nama' => 'Eka Kurniawan']);
         }
     }
 }

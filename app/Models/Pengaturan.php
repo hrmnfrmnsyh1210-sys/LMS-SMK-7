@@ -14,11 +14,11 @@ class Pengaturan extends Model
     public const CACHE_KEY = 'pengaturan.semua';
 
     public const DEFAULT = [
-        'nama_sekolah' => 'SMK Negeri 7',
-        'alamat_sekolah' => '',
-        'npsn' => '',
-        'telepon_sekolah' => '',
-        'email_sekolah' => '',
+        'nama_sekolah' => 'SMK Negeri 7 Pontianak',
+        'alamat_sekolah' => 'Jl. Tanjung Raya 2, Komp. Sekolah Terpadu, Kel. Saigon, Kec. Pontianak Timur, Kota Pontianak, Kalimantan Barat 78232',
+        'npsn' => '30107398',
+        'telepon_sekolah' => '082157868679',
+        'email_sekolah' => 'smkn7ptk@ymail.com',
         'logo' => '',
         'min_panjang_password' => '8',
         'kkm' => '75',
@@ -26,7 +26,7 @@ class Pengaturan extends Model
         // Konten website profil sekolah (landing page).
         'web_hero_judul' => 'Sekolah Vokasi Unggul, Siap Kerja dan Berkarakter',
         'web_hero_subjudul' => 'Mencetak lulusan kompeten, kreatif, dan berakhlak mulia yang siap bersaing di dunia industri.',
-        'web_nama_singkat' => '',
+        'web_nama_singkat' => 'SMKN 7 Pontianak',
         'web_hero_objek' => '',
         'web_video_profil' => '',
         'web_hero_latar' => '',
