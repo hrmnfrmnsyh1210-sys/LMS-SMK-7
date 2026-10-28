@@ -1,0 +1,154 @@
+<?php
+
+namespace Tests\Feature\Guru;
+
+use App\Models\AbsensiGuru;
+use App\Models\Guru;
+use App\Models\Jadwal;
+use App\Models\Kepsek;
+use App\Models\Siswa;
+use App\Services\AbsensiGuruService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Tests\TestCase;
+
+class AbsensiGuruTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** Rabu, dengan jadwal kelas pukul 07:00–08:30. */
+    private const HARI_JADWAL = '2026-10-28';
+
+    private function jadwalRabu(array $atribut = []): Jadwal
+    {
+        return Jadwal::factory()->create(['hari' => 'Rabu', 'jam_mulai' => '07:00', 'jam_selesai' => '08:30'] + $atribut);
+    }
+
+    private function pada(string $jam): void
+    {
+        $this->travelTo(Carbon::parse(self::HARI_JADWAL.' '.$jam));
+    }
+
+    public function test_guru_absen_masuk_dan_keluar_kelas_sesuai_jadwal(): void
+    {
+        $jadwal = $this->jadwalRabu();
+        $guru = $jadwal->pengampu->guru;
+        $this->pada('06:55');
+        $this->actingAs($guru->user);
+
+        $this->get(route('guru.absensi.index'))->assertOk()->assertSee($jadwal->pengampu->kelas->nama_kelas)->assertSee('Masuk Kelas');
+
+        $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHas('success');
+        $this->pada('08:30');
+        $this->post(route('guru.absensi.keluar', $jadwal))->assertSessionHas('success');
+
+        $this->assertDatabaseHas('absensi_guru', [
+            'guru_id' => $guru->id, 'jadwal_id' => $jadwal->id, 'tanggal' => self::HARI_JADWAL.' 00:00:00',
+            'jam_masuk' => '06:55:00', 'jam_keluar' => '08:30:00', 'status' => 'hadir',
+        ]);
+        $this->get(route('guru.absensi.index'))->assertSee('1j 35m');
+    }
+
+    public function test_masuk_kelas_melewati_toleransi_ditandai_terlambat(): void
+    {
+        $jadwal = $this->jadwalRabu();
+        $this->pada('07:11');
+
+        $this->actingAs($jadwal->pengampu->guru->user)->post(route('guru.absensi.masuk', $jadwal));
+
+        $this->assertSame('terlambat', $jadwal->absensiGuru()->first()->status);
+    }
+
+    public function test_absen_ditolak_di_luar_waktu_jadwal_atau_ganda(): void
+    {
+        $jadwal = $this->jadwalRabu();
+        $this->actingAs($jadwal->pengampu->guru->user);
+
+        $this->pada('06:44');
+        $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHasErrors('absensi');
+        $this->pada('08:31');
+        $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHasErrors('absensi');
+        $this->travelTo(Carbon::parse('2026-10-29 07:00'));
+        $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHasErrors('absensi');
+
+        $this->pada('07:00');
+        $this->post(route('guru.absensi.keluar', $jadwal))->assertSessionHasErrors('absensi');
+        $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHasErrors();
+        $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHasErrors('absensi');
+
+        $this->assertSame(1, AbsensiGuru::count());
+    }
+
+    public function test_guru_tidak_dapat_absen_di_jadwal_guru_lain(): void
+    {
+        $jadwal = $this->jadwalRabu();
+        $this->pada('07:00');
+
+        $this->actingAs(Guru::factory()->create()->user)->post(route('guru.absensi.masuk', $jadwal))->assertForbidden();
+
+        $this->assertSame(0, AbsensiGuru::count());
+    }
+
+    public function test_kepsek_dan_operator_memantau_absensi_per_sesi(): void
+    {
+        $hadir = $this->jadwalRabu();
+        $terlambat = $this->jadwalRabu(['jam_mulai' => '08:30', 'jam_selesai' => '10:00']);
+        $absen = $this->jadwalRabu(['jam_mulai' => '10:00', 'jam_selesai' => '11:30']);
+        AbsensiGuru::factory()->for($hadir)->create(['guru_id' => $hadir->pengampu->guru_id, 'tanggal' => self::HARI_JADWAL]);
+        AbsensiGuru::factory()->for($terlambat)->terlambat()->create(['guru_id' => $terlambat->pengampu->guru_id, 'tanggal' => self::HARI_JADWAL]);
+        $this->pada('12:00');
+
+        foreach ([Kepsek::factory()->create()->user, $this->operator()] as $pemantau) {
+            $prefix = $pemantau->role;
+
+            $this->actingAs($pemantau)->get(route("{$prefix}.absensi-guru.index", ['tanggal' => self::HARI_JADWAL]))
+                ->assertOk()
+                ->assertSee($absen->pengampu->guru->nama)
+                ->assertSee($terlambat->pengampu->kelas->nama_kelas)
+                ->assertSee('Tepat waktu')
+                ->assertSee('Terlambat')
+                ->assertSee('Tidak hadir');
+
+            $this->get(route("{$prefix}.absensi-guru.index", ['mode' => 'bulanan']))->assertOk()->assertSee('Sesi Terjadwal');
+        }
+    }
+
+    public function test_rekap_harian_membedakan_sesi_belum_dimulai_dan_tidak_hadir(): void
+    {
+        $lewat = $this->jadwalRabu();
+        $nanti = $this->jadwalRabu(['jam_mulai' => '13:00', 'jam_selesai' => '14:30']);
+        $this->pada('10:00');
+
+        $status = app(AbsensiGuruService::class)->rekapHarian(today())->pluck('status', 'jadwal.id');
+
+        $this->assertSame('tidak_hadir', $status[$lewat->id]);
+        $this->assertSame('belum', $status[$nanti->id]);
+    }
+
+    public function test_rekap_bulanan_menghitung_sesi_terjadwal_dan_kehadiran(): void
+    {
+        $jadwal = $this->jadwalRabu();
+        $guruId = $jadwal->pengampu->guru_id;
+        AbsensiGuru::factory()->for($jadwal)->create(['guru_id' => $guruId, 'tanggal' => '2026-10-07']);
+        AbsensiGuru::factory()->for($jadwal)->terlambat()->create(['guru_id' => $guruId, 'tanggal' => '2026-10-14']);
+        $this->travelTo(Carbon::parse('2026-10-31 12:00'));
+
+        $baris = app(AbsensiGuruService::class)->rekapBulanan(Carbon::parse('2026-10-01'))
+            ->firstWhere(fn ($r) => $r['guru']->id === $guruId);
+
+        // Rabu di Oktober 2026: 7, 14, 21, 28.
+        $this->assertSame(
+            ['terjadwal' => 4, 'hadir' => 2, 'tepat_waktu' => 1, 'terlambat' => 1, 'tidak_hadir' => 2],
+            array_diff_key($baris, ['guru' => 0])
+        );
+    }
+
+    public function test_role_lain_tidak_dapat_mengakses_absensi_guru(): void
+    {
+        $jadwal = $this->jadwalRabu();
+
+        $this->actingAs(Siswa::factory()->create()->user)->get(route('kepsek.absensi-guru.index'))->assertForbidden();
+        $this->actingAs(Guru::factory()->create()->user)->get(route('operator.absensi-guru.index'))->assertForbidden();
+        $this->actingAs(Kepsek::factory()->create()->user)->post(route('guru.absensi.masuk', $jadwal))->assertForbidden();
+    }
+}

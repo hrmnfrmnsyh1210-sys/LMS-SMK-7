@@ -1,6 +1,7 @@
 <x-layouts.app title="Dashboard">
     <x-banner-sapaan :nama="auth()->user()->nama" pesan="Semangat mengajar! Berikut ringkasan kelas Anda hari ini.">
         <a href="{{ route('guru.kelas.index') }}" class="btn-primary"><x-icon name="book" class="h-4 w-4" /> Kelas Ajar</a>
+        <a href="{{ route('guru.absensi.index') }}" class="btn-secondary"><x-icon name="clock" class="h-4 w-4" /> Absensi</a>
         @if ($kelasWali)
             <a href="{{ route('guru.wali.rekap') }}" class="btn-secondary"><x-icon name="star" class="h-4 w-4" /> Wali {{ $kelasWali->nama_kelas }}</a>
         @endif
@@ -82,6 +83,18 @@
                             <a href="{{ route('guru.kelas.show', $j->pengampu) }}" class="block truncate text-sm font-semibold text-slate-800 hover:text-blue-700">{{ $j->pengampu->mapel->nama_mapel }}</a>
                             <div class="text-xs text-slate-500">{{ $j->pengampu->kelas->nama_kelas }}@if ($j->ruang) · {{ $j->ruang }}@endif</div>
                         </div>
+                        @php $absen = $j->absensiGuru->first(); @endphp
+                        @if (! $absen)
+                            <form method="POST" action="{{ route('guru.absensi.masuk', $j) }}">
+                                @csrf
+                                <button type="submit" class="btn-primary btn-sm">Masuk Kelas</button>
+                            </form>
+                        @elseif (! $absen->jam_keluar)
+                            <form method="POST" action="{{ route('guru.absensi.keluar', $j) }}">
+                                @csrf
+                                <button type="submit" class="btn-danger btn-sm">Keluar</button>
+                            </form>
+                        @endif
                         <a href="{{ route('guru.presensi.form', $j->pengampu) }}" class="btn-secondary btn-sm">Presensi</a>
                     </li>
                 @empty

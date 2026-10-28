@@ -22,6 +22,7 @@ class Pengaturan extends Model
         'logo' => '',
         'min_panjang_password' => '8',
         'kkm' => '75',
+        'toleransi_terlambat_guru' => '10',
 
         // Konten website profil sekolah (landing page).
         'web_hero_judul' => 'Sekolah Vokasi Unggul, Siap Kerja dan Berkarakter',

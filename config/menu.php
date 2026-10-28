@@ -33,6 +33,7 @@ return [
         ['label' => 'Galeri', 'route' => 'operator.galeri.index', 'aktif' => 'operator.galeri.*', 'ikon' => 'photo'],
 
         ['judul' => 'Laporan'],
+        ['label' => 'Absensi Guru', 'route' => 'operator.absensi-guru.index', 'ikon' => 'clock'],
         ['label' => 'Laporan', 'route' => 'operator.laporan.index', 'ikon' => 'document'],
 
         ['judul' => 'Sistem'],
@@ -49,6 +50,7 @@ return [
 
         ['judul' => 'Monitoring'],
         ['label' => 'Keaktifan Guru', 'route' => 'kepsek.monitoring.guru', 'ikon' => 'user-group'],
+        ['label' => 'Absensi Guru', 'route' => 'kepsek.absensi-guru.index', 'ikon' => 'clock'],
         ['label' => 'Rekap Kelas', 'route' => 'kepsek.monitoring.kelas', 'aktif' => 'kepsek.monitoring.kelas*', 'ikon' => 'chart'],
         ['label' => 'Laporan', 'route' => 'kepsek.laporan.index', 'ikon' => 'document'],
         ['label' => 'Pengumuman', 'route' => 'kepsek.pengumuman.index', 'aktif' => 'kepsek.pengumuman.*', 'ikon' => 'megaphone'],
@@ -59,6 +61,7 @@ return [
 
     'guru' => [
         ['label' => 'Dashboard', 'route' => 'guru.dashboard', 'ikon' => 'home'],
+        ['label' => 'Absensi Mengajar', 'route' => 'guru.absensi.index', 'ikon' => 'clock'],
         ['label' => 'Kelas Ajar', 'route' => 'guru.kelas.index', 'aktif' => ['guru.kelas.*', 'guru.materi.*', 'guru.tugas.*', 'guru.kuis.*', 'guru.soal.*', 'guru.presensi.*', 'guru.nilai.*', 'guru.forum.*', 'guru.monitoring.*'], 'ikon' => 'book'],
         ['label' => 'Pengumuman', 'route' => 'guru.pengumuman.index', 'aktif' => 'guru.pengumuman.*', 'ikon' => 'megaphone'],
         ['label' => 'Laporan', 'route' => 'guru.laporan.index', 'ikon' => 'document'],

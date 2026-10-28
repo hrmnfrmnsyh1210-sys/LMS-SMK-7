@@ -105,11 +105,12 @@ class MasterDataTest extends TestCase
     public function test_pengaturan_sekolah_dan_kebijakan_password(): void
     {
         $this->put(route('operator.pengaturan.update'), [
-            'nama_sekolah' => 'SMK Uji Coba', 'min_panjang_password' => 10, 'kkm' => 70,
+            'nama_sekolah' => 'SMK Uji Coba', 'min_panjang_password' => 10, 'kkm' => 70, 'toleransi_terlambat_guru' => 5,
         ])->assertSessionHasNoErrors();
 
         $this->assertSame('SMK Uji Coba', pengaturan('nama_sekolah'));
         $this->assertSame('70', pengaturan('kkm'));
+        $this->assertSame('5', pengaturan('toleransi_terlambat_guru'));
 
         // Kebijakan password baru langsung berlaku
         $this->put(route('profil.password.update'), [

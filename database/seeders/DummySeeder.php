@@ -78,9 +78,14 @@ class DummySeeder extends Seeder
 
         // 8 guru, NIP 198001012010011001 s.d. ...008
         $daftarGuru = collect([
-            ['Ahmad Fauzi, S.Pd.I.', 'L'], ['Sri Wahyuni, S.Pd.', 'P'], ['Bambang Sutrisno, S.Pd.', 'L'],
-            ['Rina Kartika, S.Pd.', 'P'], ['Joko Susilo, S.Pd.', 'L'], ['Dewi Lestari, S.Kom.', 'P'],
-            ['Andi Saputra, S.T.', 'L'], ['Fitri Handayani, S.E.', 'P'],
+            ['Ahmad Fauzi, S.Pd.I.', 'L'],
+            ['Sri Wahyuni, S.Pd.', 'P'],
+            ['Bambang Sutrisno, S.Pd.', 'L'],
+            ['Rina Kartika, S.Pd.', 'P'],
+            ['Joko Susilo, S.Pd.', 'L'],
+            ['Dewi Lestari, S.Kom.', 'P'],
+            ['Andi Saputra, S.T.', 'L'],
+            ['Fitri Handayani, S.E.', 'P'],
         ])->values()->map(function ($g, $i) {
             $nip = '19800101201001100'.($i + 1);
 
@@ -89,14 +94,26 @@ class DummySeeder extends Seeder
 
         // Guru pengampu per mapel (indeks guru)
         $guruMapel = [
-            'PAI' => 0, 'PKN' => 0, 'BIN' => 1, 'SEJ' => 1, 'MTK' => 2,
-            'BIG' => 3, 'PJOK' => 4, 'INF' => 5, 'DDK' => 6, 'PKK' => 7,
+            'PAI' => 0,
+            'PKN' => 0,
+            'BIN' => 1,
+            'SEJ' => 1,
+            'MTK' => 2,
+            'BIG' => 3,
+            'PJOK' => 4,
+            'INF' => 5,
+            'DDK' => 6,
+            'PKK' => 7,
         ];
 
         // 6 kelas
         $kelas = collect([
-            ['X RPL 1', 'X', 'RPL'], ['X TKJ 1', 'X', 'TKJ'], ['X AKL 1', 'X', 'AKL'],
-            ['XI RPL 1', 'XI', 'RPL'], ['XI TKJ 1', 'XI', 'TKJ'], ['XII RPL 1', 'XII', 'RPL'],
+            ['X RPL 1', 'X', 'RPL'],
+            ['X TKJ 1', 'X', 'TKJ'],
+            ['X AKL 1', 'X', 'AKL'],
+            ['XI RPL 1', 'XI', 'RPL'],
+            ['XI TKJ 1', 'XI', 'TKJ'],
+            ['XII RPL 1', 'XII', 'RPL'],
         ])->map(fn ($k, $i) => Kelas::create([
             'nama_kelas' => $k[0],
             'tingkat' => $k[1],

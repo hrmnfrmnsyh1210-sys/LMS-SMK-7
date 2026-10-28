@@ -21,6 +21,8 @@
                                :value="$pengaturan['min_panjang_password']" required />
                 <x-field.input name="kkm" type="number" min="0" max="100" label="KKM (Kriteria Ketuntasan Minimal)"
                                :value="$pengaturan['kkm']" required help="Dipakai untuk menandai siswa dengan nilai rendah." />
+                <x-field.input name="toleransi_terlambat_guru" type="number" min="0" max="60" label="Toleransi terlambat guru (menit)"
+                               :value="$pengaturan['toleransi_terlambat_guru']" required help="Guru yang absen masuk kelas melewati jam mulai + toleransi ditandai terlambat." />
             </div>
         </div>
 

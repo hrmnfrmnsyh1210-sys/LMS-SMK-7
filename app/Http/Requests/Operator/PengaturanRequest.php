@@ -22,6 +22,7 @@ class PengaturanRequest extends FormRequest
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024'],
             'min_panjang_password' => ['required', 'integer', 'min:6', 'max:32'],
             'kkm' => ['required', 'integer', 'min:0', 'max:100'],
+            'toleransi_terlambat_guru' => ['required', 'integer', 'min:0', 'max:60'],
         ];
     }
 
@@ -31,6 +32,7 @@ class PengaturanRequest extends FormRequest
             'nama_sekolah' => 'nama sekolah', 'npsn' => 'NPSN', 'alamat_sekolah' => 'alamat sekolah',
             'telepon_sekolah' => 'telepon sekolah', 'email_sekolah' => 'email sekolah',
             'min_panjang_password' => 'panjang minimal password', 'kkm' => 'KKM',
+            'toleransi_terlambat_guru' => 'toleransi terlambat guru',
         ];
     }
 }

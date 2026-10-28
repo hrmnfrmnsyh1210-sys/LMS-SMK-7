@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $guru = $request->user()->guru;
         $pengampuIds = Pengampu::tahunAktif()->where('guru_id', $guru->id)->pluck('id');
 
-        $jadwalHariIni = Jadwal::with(['pengampu.mapel', 'pengampu.kelas'])
+        $jadwalHariIni = Jadwal::with(['pengampu.mapel', 'pengampu.kelas', 'absensiGuru' => fn ($q) => $q->whereDate('tanggal', today())])
             ->whereIn('pengampu_id', $pengampuIds)
             ->where('hari', self::HARI[now()->dayOfWeekIso])
             ->orderBy('jam_mulai')

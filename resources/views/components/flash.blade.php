@@ -8,11 +8,13 @@
 @endphp
 
 @foreach ($jenis as $kunci => [$kelas, $ikon])
-    @if (session($kunci))
+    {{-- Galat absensi guru dapat muncul dari halaman mana pun (dashboard maupun halaman absensi). --}}
+    @php $pesan = session($kunci) ?? ($kunci === 'error' ? $errors->first('absensi') : null); @endphp
+    @if ($pesan)
         <div x-data="{ tampil: true }" x-show="tampil" x-transition
              class="flex items-start gap-3 rounded-xl border px-4 py-3 text-sm {{ $kelas }}" role="alert">
             <x-icon :name="$ikon" class="mt-0.5 h-5 w-5 shrink-0" />
-            <div class="flex-1">{{ session($kunci) }}</div>
+            <div class="flex-1">{{ $pesan }}</div>
             <button type="button" class="opacity-60 hover:opacity-100" @click="tampil = false" aria-label="Tutup">
                 <x-icon name="x" class="h-4 w-4" />
             </button>

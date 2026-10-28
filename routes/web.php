@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AbsensiGuruController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\DashboardController;
@@ -91,7 +92,8 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::resource('berita', Operator\BeritaController::class)->except('show')->parameters(['berita' => 'berita']);
             Route::resource('galeri', Operator\GaleriController::class)->except('show')->parameters(['galeri' => 'galeri']);
 
-            // Laporan
+            // Laporan & absensi guru
+            Route::get('absensi-guru', AbsensiGuruController::class)->name('absensi-guru.index');
             Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
             Route::get('laporan/ekspor', [LaporanController::class, 'ekspor'])->name('laporan.ekspor');
             Route::post('laporan/analisis', [LaporanController::class, 'analisis'])->middleware('throttle:ai')->name('laporan.analisis');
@@ -109,6 +111,7 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('monitoring/guru', [Kepsek\MonitoringController::class, 'guru'])->name('monitoring.guru');
             Route::get('monitoring/kelas', [Kepsek\MonitoringController::class, 'kelas'])->name('monitoring.kelas');
             Route::get('monitoring/kelas/{kelas}', [Kepsek\MonitoringController::class, 'kelasShow'])->name('monitoring.kelas.show');
+            Route::get('absensi-guru', AbsensiGuruController::class)->name('absensi-guru.index');
 
             Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
             Route::get('laporan/ekspor', [LaporanController::class, 'ekspor'])->name('laporan.ekspor');
@@ -124,6 +127,10 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('/', Guru\DashboardController::class)->name('dashboard');
             Route::get('kelas', [Guru\KelasAjarController::class, 'index'])->name('kelas.index');
             Route::get('soal/template', [Guru\SoalController::class, 'template'])->name('soal.template');
+
+            Route::get('absensi', [Guru\AbsensiController::class, 'index'])->name('absensi.index');
+            Route::post('absensi/{jadwal}/masuk', [Guru\AbsensiController::class, 'masuk'])->name('absensi.masuk');
+            Route::post('absensi/{jadwal}/keluar', [Guru\AbsensiController::class, 'keluar'])->name('absensi.keluar');
 
             Route::get('laporan', [Guru\LaporanController::class, 'index'])->name('laporan.index');
             Route::get('laporan/ekspor', [Guru\LaporanController::class, 'ekspor'])->name('laporan.ekspor');

@@ -25,6 +25,11 @@ class Guru extends Model
         return $this->hasMany(Pengampu::class);
     }
 
+    public function absensi(): HasMany
+    {
+        return $this->hasMany(AbsensiGuru::class);
+    }
+
     public function kelasWali(): HasMany
     {
         return $this->hasMany(Kelas::class, 'wali_kelas_id');
