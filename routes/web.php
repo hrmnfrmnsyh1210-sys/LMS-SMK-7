@@ -96,7 +96,6 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('absensi-guru', AbsensiGuruController::class)->name('absensi-guru.index');
             Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
             Route::get('laporan/ekspor', [LaporanController::class, 'ekspor'])->name('laporan.ekspor');
-            Route::post('laporan/analisis', [LaporanController::class, 'analisis'])->middleware('throttle:ai')->name('laporan.analisis');
 
             // Log & backup
             Route::get('log-aktivitas', [Operator\LogAktivitasController::class, 'index'])->name('log.index');
@@ -115,7 +114,6 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 
             Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
             Route::get('laporan/ekspor', [LaporanController::class, 'ekspor'])->name('laporan.ekspor');
-            Route::post('laporan/analisis', [LaporanController::class, 'analisis'])->middleware('throttle:ai')->name('laporan.analisis');
 
             Route::get('pengumuman', [Kepsek\PengumumanController::class, 'index'])->name('pengumuman.index');
             Route::post('pengumuman', [Kepsek\PengumumanController::class, 'store'])->name('pengumuman.store');

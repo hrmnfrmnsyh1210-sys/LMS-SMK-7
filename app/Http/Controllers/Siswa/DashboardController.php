@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Siswa;
 use App\Http\Controllers\Controller;
 use App\Models\Jadwal;
 use App\Models\Pengumuman;
+use App\Models\Presensi;
 use App\Models\Tugas;
 use App\Services\AkademikSiswaService;
 use Illuminate\Http\Request;
@@ -33,11 +34,18 @@ class DashboardController extends Controller
             ->map(fn ($d) => $d->toDateString())
             ->all();
 
+        $presensiHariIni = Presensi::where('siswa_id', $siswa->id)
+            ->whereIn('pengampu_id', $pengampuIds)
+            ->whereDate('tanggal', today())
+            ->get()
+            ->keyBy('pengampu_id');
+
         return view('siswa.dashboard', [
             'user' => $user,
             'siswa' => $siswa,
             'kelas' => $kelas,
             'jadwalHariIni' => $jadwalHariIni,
+            'presensiHariIni' => $presensiHariIni,
             'tugasMendatang' => $akademik->tugasBelumQuery($siswa, $pengampuIds)->limit(5)->get(),
             'kuisAktif' => $akademik->kuisAktifQuery($siswa, $pengampuIds)->limit(4)->get(),
             'statistik' => $akademik->ringkasan($siswa),

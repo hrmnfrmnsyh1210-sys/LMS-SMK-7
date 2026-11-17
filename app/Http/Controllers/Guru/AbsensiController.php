@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\AbsensiGuru;
 use App\Models\Jadwal;
 use App\Services\AbsensiGuruService;
 use Illuminate\Http\RedirectResponse;
@@ -32,9 +33,37 @@ class AbsensiController extends Controller
 
     public function masuk(Request $request, Jadwal $jadwal): RedirectResponse
     {
-        $absensi = $this->service->masuk($request->user()->guru, $jadwal, $request->ip());
+        $data = $request->validate([
+            'materi' => ['nullable', 'string', 'max:1000'],
+            'aktivitas' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $absensi = $this->service->masuk(
+            $request->user()->guru,
+            $jadwal,
+            $request->ip(),
+            $data['materi'] ?? null,
+            $data['aktivitas'] ?? null
+        );
 
         return back()->with('success', "Absen masuk kelas {$jadwal->pengampu->kelas->nama_kelas} tercatat pukul ".substr($absensi->jam_masuk, 0, 5).($absensi->status === 'terlambat' ? ' (terlambat).' : '.'));
+    }
+
+    public function jurnal(Request $request, AbsensiGuru $absensiGuru): RedirectResponse
+    {
+        $data = $request->validate([
+            'materi' => ['nullable', 'string', 'max:1000'],
+            'aktivitas' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $this->service->simpanJurnal(
+            $request->user()->guru,
+            $absensiGuru,
+            $data['materi'] ?? null,
+            $data['aktivitas'] ?? null
+        );
+
+        return back()->with('success', 'Jurnal mengajar berhasil diperbarui.');
     }
 
     public function keluar(Request $request, Jadwal $jadwal): RedirectResponse

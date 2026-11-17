@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Jadwal;
 use App\Models\Pengumuman;
+use App\Models\Presensi;
 use App\Services\AkademikSiswaService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,7 +24,26 @@ class AkademikController extends Controller
 
     public function presensi(Request $request): View
     {
-        return view('siswa.presensi', $this->akademik->presensi($request->user()->siswa));
+        $siswa = $request->user()->siswa;
+        $pengampuIds = $siswa->pengampu()->pluck('id');
+        $hariIni = Jadwal::hariDari(today());
+
+        $jadwalHariIni = $hariIni ? Jadwal::with(['pengampu.mapel', 'pengampu.guru'])
+            ->whereIn('pengampu_id', $pengampuIds)
+            ->where('hari', $hariIni)
+            ->orderBy('jam_mulai')
+            ->get() : collect();
+
+        $presensiHariIni = Presensi::where('siswa_id', $siswa->id)
+            ->whereIn('pengampu_id', $pengampuIds)
+            ->whereDate('tanggal', today())
+            ->get()
+            ->keyBy('pengampu_id');
+
+        return view('siswa.presensi', $this->akademik->presensi($siswa) + [
+            'jadwalHariIni' => $jadwalHariIni,
+            'presensiHariIni' => $presensiHariIni,
+        ]);
     }
 
     public function nilai(Request $request): View

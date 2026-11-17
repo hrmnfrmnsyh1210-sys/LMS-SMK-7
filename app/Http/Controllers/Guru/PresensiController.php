@@ -30,25 +30,38 @@ class PresensiController extends Controller
     /** Form input/ubah presensi satu pertemuan (?pertemuan=n). */
     public function form(Request $request, Pengampu $pengampu): View
     {
-        $pertemuan = $request->integer('pertemuan') ?: (int) Presensi::where('pengampu_id', $pengampu->id)->max('pertemuan_ke') + 1;
+        // Pertemuan ke tidak bisa ditentukan guru — sistem hitung otomatis.
+        $pertemuanMax = (int) Presensi::where('pengampu_id', $pengampu->id)->max('pertemuan_ke');
+        $pertemuan = $request->integer('pertemuan') ?: $pertemuanMax + 1;
+
         $tanggal = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->value('tanggal')
             ?? now();
         $tanggal = $request->input('tanggal', Carbon::parse($tanggal)->toDateString());
 
+        $catatan = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->value('catatan');
+
         $siswa = $pengampu->daftarSiswa();
         $status = $this->service->statusAwal($pengampu, $pertemuan, $tanggal, $siswa);
         $izin = $this->service->izinDisetujui($siswa->pluck('id')->all(), $tanggal);
+        $presensiTersimpan = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->get()->keyBy('siswa_id');
 
-        return view('guru.presensi.form', compact('pengampu', 'pertemuan', 'tanggal', 'siswa', 'status', 'izin'));
+        return view('guru.presensi.form', compact('pengampu', 'pertemuan', 'tanggal', 'siswa', 'status', 'izin', 'catatan', 'presensiTersimpan'));
     }
 
     public function store(PresensiRequest $request, Pengampu $pengampu): RedirectResponse
     {
         $data = $request->validated();
-        $this->service->simpan($pengampu, $data['pertemuan_ke'], $data['tanggal'], $data['status']);
+        $this->service->simpan($pengampu, $data['pertemuan_ke'], $data['tanggal'], $data['status'], $data['catatan'] ?? null);
 
         ActivityLogger::log('isi_presensi', "Mengisi presensi pertemuan {$data['pertemuan_ke']} ({$pengampu->label})");
 
         return redirect()->route('guru.presensi.index', $pengampu)->with('success', "Presensi pertemuan {$data['pertemuan_ke']} tersimpan.");
+    }
+
+    public function validasi(Pengampu $pengampu, int $pertemuan): RedirectResponse
+    {
+        $jumlah = $this->service->validasiPertemuan($pengampu, $pertemuan);
+
+        return back()->with('success', "{$jumlah} presensi pertemuan {$pertemuan} berhasil divalidasi.");
     }
 }

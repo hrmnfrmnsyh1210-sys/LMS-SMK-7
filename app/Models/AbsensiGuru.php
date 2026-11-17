@@ -14,7 +14,7 @@ class AbsensiGuru extends Model
 
     protected $table = 'absensi_guru';
 
-    protected $fillable = ['guru_id', 'jadwal_id', 'tanggal', 'jam_masuk', 'jam_keluar', 'status', 'ip_masuk', 'ip_keluar'];
+    protected $fillable = ['guru_id', 'jadwal_id', 'tanggal', 'jam_masuk', 'jam_keluar', 'status', 'ip_masuk', 'ip_keluar', 'materi', 'aktivitas'];
 
     protected function casts(): array
     {

@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 
 class PresensiService
 {
@@ -41,12 +42,12 @@ class PresensiService
      *
      * @param  array<int|string, string>  $status  siswa_id => status
      */
-    public function simpan(Pengampu $pengampu, int $pertemuan, string $tanggal, array $status): void
+    public function simpan(Pengampu $pengampu, int $pertemuan, string $tanggal, array $status, ?string $catatan = null): void
     {
         $siswaValid = $pengampu->daftarSiswa()->pluck('id')->all();
         $statusLama = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->pluck('status', 'siswa_id');
 
-        DB::transaction(function () use ($pengampu, $pertemuan, $tanggal, $status, $siswaValid) {
+        DB::transaction(function () use ($pengampu, $pertemuan, $tanggal, $status, $siswaValid, $catatan) {
             foreach ($status as $siswaId => $nilai) {
                 if (! in_array((int) $siswaId, $siswaValid, true)) {
                     continue;
@@ -54,12 +55,16 @@ class PresensiService
 
                 Presensi::updateOrCreate(
                     ['pengampu_id' => $pengampu->id, 'siswa_id' => $siswaId, 'pertemuan_ke' => $pertemuan],
-                    ['tanggal' => $tanggal, 'status' => $nilai]
+                    ['tanggal' => $tanggal, 'status' => $nilai, 'status_validasi' => 'valid']
                 );
             }
 
-            // Tanggal pertemuan disamakan untuk semua siswa.
-            Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->update(['tanggal' => $tanggal]);
+            // Tanggal dan catatan pertemuan disamakan untuk semua siswa.
+            Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->update([
+                'tanggal' => $tanggal,
+                'catatan' => $catatan,
+                'status_validasi' => 'valid',
+            ]);
         });
 
         $baruAlpa = collect($status)
@@ -90,18 +95,74 @@ class PresensiService
     }
 
     /**
-     * Ringkasan per pertemuan: [pertemuan_ke, tanggal, hadir, izin, sakit, alpa].
+     * Ringkasan per pertemuan: [pertemuan_ke, tanggal, hadir, izin, sakit, alpa, menunggu_validasi].
      *
      * @return Collection<int, object>
      */
     public function daftarPertemuan(Pengampu $pengampu): Collection
     {
         return Presensi::where('pengampu_id', $pengampu->id)
-            ->selectRaw('pertemuan_ke, MIN(tanggal) as tanggal')
+            ->selectRaw('pertemuan_ke, MIN(tanggal) as tanggal, MAX(catatan) as catatan')
             ->selectRaw("SUM(status = 'hadir') as hadir, SUM(status = 'izin') as izin, SUM(status = 'sakit') as sakit, SUM(status = 'alpa') as alpa")
+            ->selectRaw("SUM(status_validasi = 'menunggu') as menunggu_validasi")
             ->groupBy('pertemuan_ke')
             ->orderBy('pertemuan_ke')
             ->get();
+    }
+
+    public function absenMandiri(Siswa $siswa, Pengampu $pengampu, string $status = 'hadir', ?string $catatan = null): Presensi
+    {
+        abort_unless($pengampu->kelas_id === $siswa->kelasPada()?->id, 403, 'Anda bukan siswa di kelas ini.');
+
+        if (! in_array($status, ['hadir', 'izin', 'sakit'], true)) {
+            throw ValidationException::withMessages(['status' => 'Status presensi tidak valid.']);
+        }
+
+        $sudah = Presensi::where('pengampu_id', $pengampu->id)
+            ->where('siswa_id', $siswa->id)
+            ->whereDate('tanggal', today())
+            ->first();
+
+        if ($sudah) {
+            throw ValidationException::withMessages(['presensi' => 'Anda sudah melakukan presensi untuk mata pelajaran ini hari ini.']);
+        }
+
+        $pertemuan = Presensi::where('pengampu_id', $pengampu->id)
+            ->whereDate('tanggal', today())
+            ->value('pertemuan_ke');
+
+        if (! $pertemuan) {
+            $pertemuanMax = (int) Presensi::where('pengampu_id', $pengampu->id)->max('pertemuan_ke');
+            $pertemuan = $pertemuanMax + 1;
+        }
+
+        $presensi = Presensi::create([
+            'pengampu_id' => $pengampu->id,
+            'siswa_id' => $siswa->id,
+            'pertemuan_ke' => $pertemuan,
+            'tanggal' => today(),
+            'status' => $status,
+            'catatan' => $catatan,
+            'status_validasi' => 'menunggu',
+            'diabsen_oleh' => 'siswa',
+            'waktu_absen' => now(),
+        ]);
+
+        ActivityLogger::log('presensi_mandiri', "Siswa {$siswa->nama} melakukan presensi mandiri ({$status}) pertemuan {$pertemuan} ({$pengampu->label})");
+
+        return $presensi;
+    }
+
+    public function validasiPertemuan(Pengampu $pengampu, int $pertemuan): int
+    {
+        $jumlah = Presensi::where('pengampu_id', $pengampu->id)
+            ->where('pertemuan_ke', $pertemuan)
+            ->where('status_validasi', 'menunggu')
+            ->update(['status_validasi' => 'valid']);
+
+        ActivityLogger::log('validasi_presensi', "Memvalidasi {$jumlah} presensi pertemuan {$pertemuan} ({$pengampu->label})");
+
+        return $jumlah;
     }
 
     /**

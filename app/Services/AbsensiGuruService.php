@@ -46,7 +46,7 @@ class AbsensiGuruService
             ->get();
     }
 
-    public function masuk(Guru $guru, Jadwal $jadwal, ?string $ip = null): AbsensiGuru
+    public function masuk(Guru $guru, Jadwal $jadwal, ?string $ip = null, ?string $materi = null, ?string $aktivitas = null): AbsensiGuru
     {
         $this->pastikanJadwalHariIni($guru, $jadwal);
 
@@ -70,9 +70,26 @@ class AbsensiGuruService
             'jam_masuk' => $jam,
             'status' => now()->gt($mulai->copy()->addMinutes($this->toleransi())) ? 'terlambat' : 'hadir',
             'ip_masuk' => $ip,
+            'materi' => $materi,
+            'aktivitas' => $aktivitas,
         ]);
 
         ActivityLogger::log('absen_masuk_kelas', "Masuk kelas {$jadwal->pengampu->kelas->nama_kelas} ({$jadwal->pengampu->mapel->nama_mapel}) pukul {$jam}");
+
+        return $absensi;
+    }
+
+    public function simpanJurnal(Guru $guru, AbsensiGuru $absensi, ?string $materi = null, ?string $aktivitas = null): AbsensiGuru
+    {
+        abort_unless($absensi->guru_id === $guru->id, 403, 'Absensi ini bukan milik Anda.');
+
+        $absensi->update([
+            'materi' => $materi,
+            'aktivitas' => $aktivitas,
+        ]);
+
+        $absensi->loadMissing(['jadwal.pengampu.kelas', 'jadwal.pengampu.mapel']);
+        ActivityLogger::log('update_jurnal_mengajar', "Memperbarui jurnal mengajar kelas {$absensi->jadwal->pengampu->kelas->nama_kelas} ({$absensi->jadwal->pengampu->mapel->nama_mapel})");
 
         return $absensi;
     }

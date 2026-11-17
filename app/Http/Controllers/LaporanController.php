@@ -22,13 +22,15 @@ class LaporanController extends Controller
     public function index(Request $request, AsistenAiService $ai): View
     {
         $filter = $this->filter($request);
+        // AI analisis laporan hanya tersedia untuk operator, tidak untuk kepala sekolah.
+        $isKepsek = $request->user()->role === 'kepsek';
 
         return view('laporan.index', $filter + [
             'laporan' => $this->buat($filter),
             'daftarTahun' => TahunAjaran::orderByDesc('nama')->orderByDesc('semester')->get(),
             'daftarKelas' => $filter['tahun'] ? Kelas::where('tahun_ajaran_id', $filter['tahun']->id)->orderBy('nama_kelas')->get() : collect(),
             'prefix' => $request->user()->role,
-            'aiAktif' => $ai->aktif(),
+            'aiAktif' => ! $isKepsek && $ai->aktif(),
         ]);
     }
 

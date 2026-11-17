@@ -20,6 +20,7 @@ class PresensiRequest extends FormRequest
             'tanggal' => ['required', 'date', 'before_or_equal:today'],
             'status' => ['required', 'array'],
             'status.*' => ['required', Rule::in(array_keys(PresensiService::STATUS))],
+            'catatan' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
