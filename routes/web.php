@@ -211,6 +211,7 @@ Route::middleware(['auth', 'aktif'])->group(function () {
             Route::get('kuis', [Siswa\KuisController::class, 'index'])->name('kuis.index');
             Route::get('jadwal', [Siswa\AkademikController::class, 'jadwal'])->name('jadwal');
             Route::get('presensi', [Siswa\AkademikController::class, 'presensi'])->name('presensi');
+            Route::post('presensi', [Siswa\PresensiController::class, 'store'])->name('presensi.store');
             Route::get('nilai', [Siswa\AkademikController::class, 'nilai'])->name('nilai');
             Route::get('pengumuman', [Siswa\AkademikController::class, 'pengumuman'])->name('pengumuman');
             Route::get('asisten', [Siswa\AsistenController::class, 'index'])->name('asisten');

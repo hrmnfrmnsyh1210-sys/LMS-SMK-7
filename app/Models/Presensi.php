@@ -16,7 +16,6 @@ class Presensi extends Model
         'pertemuan_ke',
         'status',
         'catatan',
-        'status_validasi',
         'diabsen_oleh',
         'waktu_absen',
     ];
@@ -29,14 +28,9 @@ class Presensi extends Model
         ];
     }
 
-    public function isMenungguValidasi(): bool
+    public function diabsenOlehSiswa(): bool
     {
-        return $this->status_validasi === 'menunggu';
-    }
-
-    public function isDivalidasi(): bool
-    {
-        return $this->status_validasi === 'valid';
+        return $this->diabsen_oleh === 'siswa';
     }
 
     public function pengampu(): BelongsTo

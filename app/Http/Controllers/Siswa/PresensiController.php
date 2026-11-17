@@ -26,6 +26,6 @@ class PresensiController extends Controller
 
         $this->service->absenMandiri($siswa, $pengampu, $data['status'], $data['catatan'] ?? null);
 
-        return back()->with('success', "Presensi mata pelajaran {$pengampu->mapel->nama_mapel} berhasil dicatat dan menunggu validasi guru.");
+        return back()->with('success', "Presensi mata pelajaran {$pengampu->mapel->nama_mapel} berhasil dicatat.");
     }
 }

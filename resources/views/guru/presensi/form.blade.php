@@ -71,6 +71,11 @@
                                             <x-icon name="document" class="h-3 w-3" /> Surat {{ $izin[$s->id] }} disetujui
                                         </span>
                                     @endif
+                                    @if (isset($presensiTersimpan[$s->id]) && $presensiTersimpan[$s->id]->diabsen_oleh === 'siswa')
+                                        <span class="inline-flex items-center gap-1 text-xs text-violet-600 font-medium">
+                                            <x-icon name="user" class="h-3 w-3" /> Absen mandiri
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     <div class="flex flex-wrap gap-1.5">

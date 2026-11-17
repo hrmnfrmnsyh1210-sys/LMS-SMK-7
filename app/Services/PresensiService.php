@@ -55,7 +55,7 @@ class PresensiService
 
                 Presensi::updateOrCreate(
                     ['pengampu_id' => $pengampu->id, 'siswa_id' => $siswaId, 'pertemuan_ke' => $pertemuan],
-                    ['tanggal' => $tanggal, 'status' => $nilai, 'status_validasi' => 'valid']
+                    ['tanggal' => $tanggal, 'status' => $nilai]
                 );
             }
 
@@ -63,7 +63,6 @@ class PresensiService
             Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->update([
                 'tanggal' => $tanggal,
                 'catatan' => $catatan,
-                'status_validasi' => 'valid',
             ]);
         });
 
@@ -95,7 +94,7 @@ class PresensiService
     }
 
     /**
-     * Ringkasan per pertemuan: [pertemuan_ke, tanggal, hadir, izin, sakit, alpa, menunggu_validasi].
+     * Ringkasan per pertemuan: [pertemuan_ke, tanggal, hadir, izin, sakit, alpa].
      *
      * @return Collection<int, object>
      */
@@ -104,7 +103,6 @@ class PresensiService
         return Presensi::where('pengampu_id', $pengampu->id)
             ->selectRaw('pertemuan_ke, MIN(tanggal) as tanggal, MAX(catatan) as catatan')
             ->selectRaw("SUM(status = 'hadir') as hadir, SUM(status = 'izin') as izin, SUM(status = 'sakit') as sakit, SUM(status = 'alpa') as alpa")
-            ->selectRaw("SUM(status_validasi = 'menunggu') as menunggu_validasi")
             ->groupBy('pertemuan_ke')
             ->orderBy('pertemuan_ke')
             ->get();
@@ -143,7 +141,6 @@ class PresensiService
             'tanggal' => today(),
             'status' => $status,
             'catatan' => $catatan,
-            'status_validasi' => 'menunggu',
             'diabsen_oleh' => 'siswa',
             'waktu_absen' => now(),
         ]);
@@ -151,18 +148,6 @@ class PresensiService
         ActivityLogger::log('presensi_mandiri', "Siswa {$siswa->nama} melakukan presensi mandiri ({$status}) pertemuan {$pertemuan} ({$pengampu->label})");
 
         return $presensi;
-    }
-
-    public function validasiPertemuan(Pengampu $pengampu, int $pertemuan): int
-    {
-        $jumlah = Presensi::where('pengampu_id', $pengampu->id)
-            ->where('pertemuan_ke', $pertemuan)
-            ->where('status_validasi', 'menunggu')
-            ->update(['status_validasi' => 'valid']);
-
-        ActivityLogger::log('validasi_presensi', "Memvalidasi {$jumlah} presensi pertemuan {$pertemuan} ({$pengampu->label})");
-
-        return $jumlah;
     }
 
     /**

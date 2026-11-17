@@ -57,11 +57,4 @@ class PresensiController extends Controller
 
         return redirect()->route('guru.presensi.index', $pengampu)->with('success', "Presensi pertemuan {$data['pertemuan_ke']} tersimpan.");
     }
-
-    public function validasi(Pengampu $pengampu, int $pertemuan): RedirectResponse
-    {
-        $jumlah = $this->service->validasiPertemuan($pengampu, $pertemuan);
-
-        return back()->with('success', "{$jumlah} presensi pertemuan {$pertemuan} berhasil divalidasi.");
-    }
 }
