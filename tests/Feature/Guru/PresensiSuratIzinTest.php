@@ -6,6 +6,8 @@ use App\Models\Presensi;
 use App\Models\Siswa;
 use App\Models\SuratIzin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PresensiSuratIzinTest extends TestCase
@@ -104,5 +106,79 @@ class PresensiSuratIzinTest extends TestCase
 
         $this->put(route('guru.wali.surat-izin.proses', $surat), ['status' => 'disetujui'])->assertForbidden();
         $this->assertSame('menunggu', $surat->fresh()->status);
+    }
+
+    public function test_pertemuan_otomatis_dan_jurnal_materi_tugas_tersimpan(): void
+    {
+        [$pengampu, $siswa] = $this->kelasAjar(2);
+
+        // Kunjungan pertama tanpa parameter pertemuan otomatis mengarah ke pertemuan 1
+        $this->get(route('guru.presensi.form', $pengampu))
+            ->assertOk()
+            ->assertSee('Pertemuan ke-1')
+            ->assertViewHas('pertemuan', 1);
+
+        // Guru mengisi presensi beserta materi dan tugas hari ini
+        $this->post(route('guru.presensi.store', $pengampu), [
+            'pertemuan_ke' => 1,
+            'tanggal' => today()->toDateString(),
+            'status' => [$siswa[0]->id => 'hadir', $siswa[1]->id => 'hadir'],
+            'materi' => 'Pengenalan Algoritma Pemrograman',
+            'tugas' => 'Mengerjakan flowchart studi kasus 1',
+            'catatan' => 'Siswa sangat antusias',
+        ])->assertRedirect(route('guru.presensi.index', $pengampu));
+
+        $this->assertDatabaseHas('presensi', [
+            'pengampu_id' => $pengampu->id,
+            'pertemuan_ke' => 1,
+            'materi' => 'Pengenalan Algoritma Pemrograman',
+            'tugas' => 'Mengerjakan flowchart studi kasus 1',
+            'catatan' => 'Siswa sangat antusias',
+        ]);
+
+        // Kunjungan berikutnya di hari yang sama otomatis memuat pertemuan 1 yang sudah ada
+        $this->get(route('guru.presensi.form', $pengampu))
+            ->assertOk()
+            ->assertViewHas('pertemuan', 1)
+            ->assertSee('Pengenalan Algoritma Pemrograman')
+            ->assertSee('Mengerjakan flowchart studi kasus 1');
+    }
+
+    public function test_guru_dapat_mengunggah_dan_menghapus_dokumentasi_bukti_jurnal(): void
+    {
+        Storage::fake('public');
+        [$pengampu, $siswa] = $this->kelasAjar(2);
+
+        $file = UploadedFile::fake()->image('bukti_pembelajaran.jpg');
+
+        $this->post(route('guru.presensi.store', $pengampu), [
+            'pertemuan_ke' => 1,
+            'tanggal' => today()->toDateString(),
+            'status' => [$siswa[0]->id => 'hadir', $siswa[1]->id => 'hadir'],
+            'materi' => 'Praktikum Jaringan Dasar',
+            'tugas' => 'Konfigurasi IP Address di Packet Tracer',
+            'dokumentasi' => $file,
+        ])->assertRedirect(route('guru.presensi.index', $pengampu));
+
+        $presensi = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', 1)->first();
+        $this->assertNotNull($presensi->dokumentasi);
+        Storage::disk('public')->assertExists($presensi->dokumentasi);
+
+        // Form memuat bukti yang sudah diunggah
+        $this->get(route('guru.presensi.form', $pengampu))
+            ->assertOk()
+            ->assertViewHas('dokumentasi', $presensi->dokumentasi);
+
+        // Menghapus bukti via checkbox hapus_dokumentasi
+        $this->post(route('guru.presensi.store', $pengampu), [
+            'pertemuan_ke' => 1,
+            'tanggal' => today()->toDateString(),
+            'status' => [$siswa[0]->id => 'hadir', $siswa[1]->id => 'hadir'],
+            'materi' => 'Praktikum Jaringan Dasar',
+            'hapus_dokumentasi' => '1',
+        ])->assertRedirect(route('guru.presensi.index', $pengampu));
+
+        $presensi->refresh();
+        $this->assertNull($presensi->dokumentasi);
     }
 }

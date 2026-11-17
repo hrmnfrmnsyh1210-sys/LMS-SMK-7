@@ -46,6 +46,7 @@
                             <th>Jadwal</th>
                             <th>Guru</th>
                             <th>Kelas & Mapel</th>
+                            <th>Jurnal Pembelajaran</th>
                             <th class="text-center">Masuk</th>
                             <th class="text-center">Keluar</th>
                             <th>Status</th>
@@ -73,12 +74,33 @@
                                     <div class="font-medium text-slate-800">{{ $j->pengampu->kelas->nama_kelas }}</div>
                                     <div class="text-xs text-slate-500">{{ $j->pengampu->mapel->nama_mapel }}@if ($j->ruang) · {{ $j->ruang }}@endif</div>
                                 </td>
+                                <td class="min-w-[200px]">
+                                    @if ($r['materi'] || $r['tugas'])
+                                        <div class="space-y-1 text-xs">
+                                            @if ($r['materi'])
+                                                <div><span class="font-semibold text-blue-700">Materi:</span> <span class="text-slate-700">{{ $r['materi'] }}</span></div>
+                                            @endif
+                                            @if ($r['tugas'])
+                                                <div><span class="font-semibold text-amber-700">Tugas:</span> <span class="text-slate-600">{{ $r['tugas'] }}</span></div>
+                                            @endif
+                                            @if (! empty($r['dokumentasi']))
+                                                <div class="pt-1">
+                                                    <a href="{{ file_url($r['dokumentasi']) }}" target="_blank" class="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800">
+                                                        <x-icon name="photo" class="h-3.5 w-3.5" /> Bukti Foto
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-slate-400 italic">Belum ada jurnal</span>
+                                    @endif
+                                </td>
                                 <td class="text-center">{{ $a ? substr($a->jam_masuk, 0, 5) : '-' }}</td>
                                 <td class="text-center">{{ $a?->jam_keluar ? substr($a->jam_keluar, 0, 5) : '-' }}</td>
                                 <td><x-badge :warna="$warna">{{ $label }}</x-badge></td>
                             </tr>
                         @empty
-                            <x-empty-row :colspan="6" :pesan="\App\Models\Jadwal::hariDari($tanggal) ? 'Tidak ada jadwal mengajar pada tanggal ini.' : 'Hari Minggu tidak ada jadwal mengajar.'" />
+                            <x-empty-row :colspan="7" :pesan="\App\Models\Jadwal::hariDari($tanggal) ? 'Tidak ada jadwal mengajar pada tanggal ini.' : 'Hari Minggu tidak ada jadwal mengajar.'" />
                         @endforelse
                     </tbody>
                 </table>

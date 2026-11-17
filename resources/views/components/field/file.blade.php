@@ -1,4 +1,4 @@
-@props(['name' => 'file', 'label' => 'File', 'pathLama' => null, 'help' => null, 'accept' => null])
+@props(['name' => 'file', 'label' => 'File', 'pathLama' => null, 'help' => null, 'accept' => null, 'hapusName' => null])
 
 <div>
     <label for="{{ $name }}" class="label">{{ $label }}</label>
@@ -7,7 +7,7 @@
             <x-icon name="document" class="h-4 w-4 text-blue-600" />
             <a href="{{ file_url($pathLama) }}" target="_blank" class="link truncate">{{ basename($pathLama) }}</a>
             <label class="ml-auto flex items-center gap-1.5 text-xs text-red-600">
-                <input type="checkbox" name="hapus_file" value="1" class="rounded border-slate-300"> Hapus file
+                <input type="checkbox" name="{{ $hapusName ?? ($name === 'file' ? 'hapus_file' : 'hapus_'.$name) }}" value="1" class="rounded border-slate-300"> Hapus file
             </label>
         </div>
     @endif

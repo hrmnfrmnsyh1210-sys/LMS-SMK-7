@@ -5,7 +5,7 @@
         $warna = ['hadir' => 'peer-checked:bg-emerald-600', 'izin' => 'peer-checked:bg-sky-600', 'sakit' => 'peer-checked:bg-amber-500', 'alpa' => 'peer-checked:bg-rose-600'];
     @endphp
 
-    <form method="POST" action="{{ route('guru.presensi.store', $pengampu) }}" class="space-y-4"
+    <form method="POST" action="{{ route('guru.presensi.store', $pengampu) }}" enctype="multipart/form-data" class="space-y-4"
           x-data="{ semua(status) { $root.querySelectorAll('input[type=radio][value=' + status + ']').forEach(r => r.checked = true) } }">
         @csrf
 
@@ -35,13 +35,36 @@
                     </div>
                 </div>
             </div>
-            {{-- Catatan/Laporan Pertemuan --}}
-            <div class="p-4 sm:p-6">
-                <label for="catatan" class="label">Catatan / Laporan Pertemuan <span class="text-slate-400 font-normal">(opsional)</span></label>
-                <textarea name="catatan" id="catatan" rows="3" maxlength="1000"
-                          class="input w-full resize-none"
-                          placeholder="Isi materi yang diajarkan, kendala, atau catatan penting lainnya…">{{ old('catatan', $catatan) }}</textarea>
-                @error('catatan') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            {{-- Jurnal Pembelajaran: Materi, Tugas, Catatan & Bukti Dokumentasi --}}
+            <div class="grid gap-4 p-4 sm:p-6 lg:grid-cols-2 border-b border-slate-100">
+                <div>
+                    <label for="materi" class="label">Materi yang Diajarkan Hari Ini <span class="text-rose-500">*</span></label>
+                    <textarea name="materi" id="materi" rows="2" maxlength="1000"
+                              class="input w-full resize-none"
+                              placeholder="Tuliskan pokok materi / kompetensi yang diajarkan hari ini…">{{ old('materi', $materi) }}</textarea>
+                    @error('materi') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="tugas" class="label">Tugas yang Diberikan ke Siswa <span class="text-slate-400 font-normal">(opsional)</span></label>
+                    <textarea name="tugas" id="tugas" rows="2" maxlength="1000"
+                              class="input w-full resize-none"
+                              placeholder="Tuliskan penugasan / latihan yang diberikan ke siswa hari ini…">{{ old('tugas', $tugas) }}</textarea>
+                    @error('tugas') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="catatan" class="label">Catatan Tambahan / Kendala Kelas <span class="text-slate-400 font-normal">(opsional)</span></label>
+                    <textarea name="catatan" id="catatan" rows="2" maxlength="1000"
+                              class="input w-full resize-none"
+                              placeholder="Catatan interaksi siswa, kendala, atau hal penting lainnya…">{{ old('catatan', $catatan) }}</textarea>
+                    @error('catatan') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <x-field.file name="dokumentasi"
+                                  label="Foto Bukti Dokumentasi Pembelajaran (Opsional)"
+                                  :path-lama="$dokumentasi"
+                                  help="Unggah foto kegiatan belajar mengajar di kelas. JPG/PNG maksimal 5 MB."
+                                  accept="image/*,.pdf" />
+                </div>
             </div>
         </div>
 

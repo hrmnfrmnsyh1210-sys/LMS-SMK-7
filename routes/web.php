@@ -128,6 +128,7 @@ Route::middleware(['auth', 'aktif'])->group(function () {
 
             Route::get('absensi', [Guru\AbsensiController::class, 'index'])->name('absensi.index');
             Route::post('absensi/{jadwal}/masuk', [Guru\AbsensiController::class, 'masuk'])->name('absensi.masuk');
+            Route::put('absensi/{absensiGuru}/jurnal', [Guru\AbsensiController::class, 'jurnal'])->name('absensi.jurnal');
             Route::post('absensi/{jadwal}/keluar', [Guru\AbsensiController::class, 'keluar'])->name('absensi.keluar');
 
             Route::get('laporan', [Guru\LaporanController::class, 'index'])->name('laporan.index');

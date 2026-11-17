@@ -26,6 +26,9 @@ class HalamanSiswaTest extends TestCase
         Materi::factory()->create(['pengampu_id' => $pengampu->id, 'judul' => 'Pengantar Basis Data']);
         $topik = ForumTopik::create(['pengampu_id' => $pengampu->id, 'user_id' => $siswa->user_id, 'judul' => 'Tanya ERD', 'isi' => 'Bagaimana?']);
 
+        // siswa.presensi redirect ke siswa.jadwal — cek redirect saja, bukan halaman daftar di atas.
+        $this->get(route('siswa.presensi'))->assertRedirect(route('siswa.jadwal'));
+
         $halaman = [
             route('siswa.dashboard'),
             route('siswa.mapel.index'),
@@ -39,7 +42,6 @@ class HalamanSiswaTest extends TestCase
             route('siswa.forum.index', $pengampu),
             route('siswa.forum.show', [$pengampu, $topik]),
             route('siswa.jadwal'),
-            route('siswa.presensi'),
             route('siswa.nilai'),
             route('siswa.pengumuman'),
             route('siswa.surat-izin.index'),

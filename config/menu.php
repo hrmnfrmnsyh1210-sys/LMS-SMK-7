@@ -61,8 +61,7 @@ return [
 
     'guru' => [
         ['label' => 'Dashboard', 'route' => 'guru.dashboard', 'ikon' => 'home'],
-        ['label' => 'Absensi Mengajar', 'route' => 'guru.absensi.index', 'ikon' => 'clock'],
-        ['label' => 'Kelas Ajar', 'route' => 'guru.kelas.index', 'aktif' => ['guru.kelas.*', 'guru.materi.*', 'guru.tugas.*', 'guru.kuis.*', 'guru.soal.*', 'guru.presensi.*', 'guru.nilai.*', 'guru.forum.*', 'guru.monitoring.*'], 'ikon' => 'book'],
+        ['label' => 'Kelas & Absensi Mengajar', 'route' => 'guru.kelas.index', 'aktif' => ['guru.kelas.*', 'guru.absensi.*', 'guru.materi.*', 'guru.tugas.*', 'guru.kuis.*', 'guru.soal.*', 'guru.presensi.*', 'guru.nilai.*', 'guru.forum.*', 'guru.monitoring.*'], 'ikon' => 'book'],
         ['label' => 'Pengumuman', 'route' => 'guru.pengumuman.index', 'aktif' => 'guru.pengumuman.*', 'ikon' => 'megaphone'],
         ['label' => 'Laporan', 'route' => 'guru.laporan.index', 'ikon' => 'document'],
 
@@ -82,12 +81,11 @@ return [
         ['label' => 'Mata Pelajaran', 'route' => 'siswa.mapel.index', 'aktif' => ['siswa.mapel.*', 'siswa.forum.*'], 'ikon' => 'book'],
         ['label' => 'Tugas', 'route' => 'siswa.tugas.index', 'aktif' => 'siswa.tugas.*', 'ikon' => 'clipboard-check'],
         ['label' => 'Kuis & Ujian', 'route' => 'siswa.kuis.index', 'aktif' => 'siswa.kuis.*', 'ikon' => 'puzzle'],
-        ['label' => 'Jadwal', 'route' => 'siswa.jadwal', 'ikon' => 'clock'],
+        ['label' => 'Jadwal & Presensi', 'route' => 'siswa.jadwal', 'aktif' => ['siswa.jadwal', 'siswa.presensi'], 'ikon' => 'clock'],
         ['label' => 'Asisten Belajar', 'route' => 'siswa.asisten', 'ikon' => 'sparkles'],
 
         ['judul' => 'Progres'],
         ['label' => 'Nilai', 'route' => 'siswa.nilai', 'ikon' => 'chart'],
-        ['label' => 'Presensi', 'route' => 'siswa.presensi', 'ikon' => 'check-badge'],
         ['label' => 'Surat Izin', 'route' => 'siswa.surat-izin.index', 'aktif' => 'siswa.surat-izin.*', 'ikon' => 'document'],
         ['label' => 'Pengumuman', 'route' => 'siswa.pengumuman', 'ikon' => 'megaphone'],
 

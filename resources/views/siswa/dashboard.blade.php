@@ -21,7 +21,7 @@
     $ringkasan = [
         ['clipboard-check', 'Tugas', $statistik['tugas'], 'belum dikumpulkan', route('siswa.tugas.index', ['status' => 'belum']), 'from-pink-50 to-pink-100/60', 'from-pink-300 to-pink-400'],
         ['puzzle', 'Kuis', $statistik['kuis'], 'sedang dibuka', route('siswa.kuis.index'), 'from-sky-50 to-sky-100/60', 'from-sky-300 to-sky-400'],
-        ['check-badge', 'Kehadiran', $statistik['kehadiran'] !== null ? $statistik['kehadiran'].'%' : '-', 'tahun ajaran ini', route('siswa.presensi'), 'from-emerald-50 to-emerald-100/60', 'from-emerald-200 to-emerald-500'],
+        ['check-badge', 'Kehadiran', $statistik['kehadiran'] !== null ? $statistik['kehadiran'].'%' : '-', 'tahun ajaran ini', route('siswa.jadwal'), 'from-emerald-50 to-emerald-100/60', 'from-emerald-200 to-emerald-500'],
         ['chart', 'Rata-rata', $statistik['nilai'] ?? '-', 'nilai akhir', route('siswa.nilai'), 'from-violet-50 to-violet-100/60', 'from-violet-300 to-violet-400'],
     ];
 @endphp
@@ -96,13 +96,31 @@
             </div>
             <ul class="space-y-3 px-4 pb-5 sm:px-6">
                 @forelse ($jadwalHariIni as $j)
-                    <li class="flex items-center gap-3 rounded-2xl border border-slate-100 p-3">
-                        <span class="flex h-11 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-blue-50 text-xs font-semibold text-blue-700">
-                            {{ substr($j->jam_mulai, 0, 5) }}<span class="font-normal text-blue-400">{{ substr($j->jam_selesai, 0, 5) }}</span>
-                        </span>
-                        <div class="min-w-0 flex-1">
-                            <a href="{{ route('siswa.mapel.show', $j->pengampu) }}" class="block truncate text-sm font-semibold text-slate-800 hover:text-blue-700">{{ $j->pengampu->mapel->nama_mapel }}</a>
-                            <div class="truncate text-xs text-slate-500">{{ $j->pengampu->guru->nama }}@if ($j->ruang) · {{ $j->ruang }}@endif</div>
+                    @php $p = $presensiHariIni->get($j->pengampu_id); @endphp
+                    <li class="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 p-3">
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <span class="flex h-11 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-blue-50 text-xs font-semibold text-blue-700">
+                                {{ substr($j->jam_mulai, 0, 5) }}<span class="font-normal text-blue-400">{{ substr($j->jam_selesai, 0, 5) }}</span>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <a href="{{ route('siswa.mapel.show', $j->pengampu) }}" class="block truncate text-sm font-semibold text-slate-800 hover:text-blue-700">{{ $j->pengampu->mapel->nama_mapel }}</a>
+                                <div class="truncate text-xs text-slate-500">{{ $j->pengampu->guru->nama }}@if ($j->ruang) · {{ $j->ruang }}@endif</div>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            @if ($p)
+                                <x-badge :status="$p->status">{{ ucfirst($p->status) }}</x-badge>
+                            @elseif ($sesiTerbukaPengampuIds->contains($j->pengampu_id))
+                                <button type="button"
+                                        @click="$dispatch('buka-presensi', { id: {{ $j->pengampu_id }}, mapel: '{{ addslashes($j->pengampu->mapel->nama_mapel) }}', guru: '{{ addslashes($j->pengampu->guru->nama) }}' })"
+                                        class="btn-primary btn-sm">
+                                    Absen
+                                </button>
+                            @else
+                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700" title="Guru belum melakukan absen masuk kelas">
+                                    <x-icon name="clock" class="h-3 w-3" /> Menunggu Guru
+                                </span>
+                            @endif
                         </div>
                     </li>
                 @empty
@@ -203,4 +221,6 @@
             <x-kalender class="px-4 pb-5 sm:px-6" :tandai="$deadline" />
         </div>
     </div>
+
+    <x-siswa.modal-presensi />
 </x-layouts.app>

@@ -1,38 +1,71 @@
 <x-layouts.app :title="'Presensi · '.$pengampu->label">
     <x-kelas-ajar-header :pengampu="$pengampu" aktif="presensi" />
 
-    <x-page-header title="Presensi" subtitle="Input kehadiran per pertemuan. Surat izin yang disetujui wali kelas otomatis mengisi status izin/sakit.">
-        <a href="{{ route('guru.presensi.form', $pengampu) }}" class="btn-primary"><x-icon name="plus" class="h-4 w-4" /> Isi Pertemuan Baru</a>
+    <x-page-header title="Presensi & Jurnal Mengajar" subtitle="Presensi kehadiran siswa dan jurnal harian materi serta tugas setiap pertemuan kelas.">
+        <a href="{{ route('guru.presensi.form', $pengampu) }}" class="btn-primary">
+            <x-icon name="check-badge" class="h-4 w-4" />
+            @if ($pertemuanHariIni)
+                Presensi Hari Ini (Pertemuan {{ $pertemuanHariIni }})
+            @else
+                Mulai Presensi Hari Ini (Pertemuan {{ $pertemuanOtomatis }})
+            @endif
+        </a>
     </x-page-header>
 
     <div class="grid gap-6 lg:grid-cols-5">
-        {{-- Daftar Pertemuan --}}
+        {{-- Daftar Pertemuan & Jurnal --}}
         <div class="card lg:col-span-2">
-            <div class="card-header"><h3 class="card-title">Daftar Pertemuan</h3></div>
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Jurnal & Daftar Pertemuan</h3>
+                    <p class="text-xs text-slate-500">Materi, tugas, dan rekap per sesi kelas</p>
+                </div>
+            </div>
             <div class="divide-y divide-slate-100">
                 @forelse ($pertemuan as $p)
                     <div class="flex items-start gap-3 px-4 py-3 sm:px-5">
                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-700">
                             {{ $p->pertemuan_ke }}
                         </span>
-                        <div class="min-w-0 flex-1">
-                            <div class="flex flex-wrap items-center gap-2">
+                        <div class="min-w-0 flex-1 space-y-1">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
                                 <span class="text-sm font-semibold text-slate-800">{{ tanggal_indo($p->tanggal, false) }}</span>
-                                <div class="flex gap-2 text-xs">
-                                    <span class="text-emerald-600">H:{{ (int) $p->hadir }}</span>
-                                    <span class="text-sky-600">I:{{ (int) $p->izin }}</span>
-                                    <span class="text-amber-600">S:{{ (int) $p->sakit }}</span>
-                                    <span class="text-rose-600">A:{{ (int) $p->alpa }}</span>
+                                <div class="flex gap-1.5 text-xs">
+                                    <span class="text-emerald-600 font-medium">H:{{ (int) $p->hadir }}</span>
+                                    <span class="text-sky-600 font-medium">I:{{ (int) $p->izin }}</span>
+                                    <span class="text-amber-600 font-medium">S:{{ (int) $p->sakit }}</span>
+                                    <span class="text-rose-600 font-medium">A:{{ (int) $p->alpa }}</span>
                                 </div>
                             </div>
+
+                            @if ($p->materi)
+                                <div class="text-xs text-slate-700">
+                                    <span class="font-semibold text-blue-700">Materi:</span> {{ $p->materi }}
+                                </div>
+                            @endif
+
+                            @if ($p->tugas)
+                                <div class="text-xs text-slate-600">
+                                    <span class="font-semibold text-amber-700">Tugas:</span> {{ $p->tugas }}
+                                </div>
+                            @endif
+
                             @if ($p->catatan)
-                                <p class="mt-0.5 line-clamp-2 text-xs text-slate-500">{{ $p->catatan }}</p>
+                                <p class="line-clamp-2 text-xs text-slate-400 italic">"{{ $p->catatan }}"</p>
+                            @endif
+
+                            @if ($p->dokumentasi)
+                                <div class="pt-0.5">
+                                    <a href="{{ file_url($p->dokumentasi) }}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800">
+                                        <x-icon name="photo" class="h-3.5 w-3.5" /> Lihat Bukti Foto
+                                    </a>
+                                </div>
                             @endif
                         </div>
                         <a href="{{ route('guru.presensi.form', [$pengampu, 'pertemuan' => $p->pertemuan_ke]) }}" class="card-link shrink-0">Ubah</a>
                     </div>
                 @empty
-                    <div class="py-8 text-center text-sm text-slate-500">Belum ada presensi.</div>
+                    <div class="py-8 text-center text-sm text-slate-500">Belum ada presensi pertemuan.</div>
                 @endforelse
             </div>
         </div>

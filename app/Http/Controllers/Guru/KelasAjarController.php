@@ -6,17 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\KelasSiswa;
 use App\Models\Pengampu;
 use App\Models\TahunAjaran;
+use App\Services\AbsensiGuruService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class KelasAjarController extends Controller
 {
+    public function __construct(private AbsensiGuruService $absensiGuruService) {}
+
     public function index(Request $request): View
     {
+        $guru = $request->user()->guru;
+
         $pengampu = Pengampu::with(['mapel', 'kelas.jurusan', 'jadwal'])
             ->withCount(['materi', 'tugas', 'kuis'])
             ->tahunAktif()
-            ->where('guru_id', $request->user()->guru->id)
+            ->where('guru_id', $guru->id)
             ->get()
             ->sortBy(fn ($p) => $p->kelas->nama_kelas.$p->mapel->nama_mapel)
             ->values();
@@ -28,7 +33,16 @@ class KelasAjarController extends Controller
             ->groupBy('kelas_id')
             ->pluck('jumlah', 'kelas_id');
 
-        return view('guru.kelas.index', compact('pengampu', 'jumlahSiswa'));
+        $jadwalHariIni = $this->absensiGuruService->jadwalHariIni($guru);
+        $riwayatAbsensi = $guru->absensi()
+            ->with(['jadwal.pengampu.kelas', 'jadwal.pengampu.mapel'])
+            ->whereBetween('tanggal', [now()->startOfMonth()->toDateString(), today()->toDateString()])
+            ->latest('tanggal')
+            ->latest('jam_masuk')
+            ->get();
+        $toleransi = $this->absensiGuruService->toleransi();
+
+        return view('guru.kelas.index', compact('pengampu', 'jumlahSiswa', 'jadwalHariIni', 'riwayatAbsensi', 'toleransi'));
     }
 
     /** Halaman utama kelas ajar: daftar siswa. */

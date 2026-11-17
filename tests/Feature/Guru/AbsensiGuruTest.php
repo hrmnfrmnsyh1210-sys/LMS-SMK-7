@@ -36,7 +36,8 @@ class AbsensiGuruTest extends TestCase
         $this->pada('06:55');
         $this->actingAs($guru->user);
 
-        $this->get(route('guru.absensi.index'))->assertOk()->assertSee($jadwal->pengampu->kelas->nama_kelas)->assertSee('Masuk Kelas');
+        $this->get(route('guru.absensi.index'))->assertRedirect(route('guru.kelas.index'));
+        $this->get(route('guru.kelas.index'))->assertOk()->assertSee($jadwal->pengampu->kelas->nama_kelas)->assertSee('Masuk Kelas');
 
         $this->post(route('guru.absensi.masuk', $jadwal))->assertSessionHas('success');
         $this->pada('08:30');
@@ -46,7 +47,7 @@ class AbsensiGuruTest extends TestCase
         $this->assertSame([$guru->id, $jadwal->id, self::HARI_JADWAL, '06:55:00', '08:30:00', 'hadir'], [
             $absensi->guru_id, $absensi->jadwal_id, $absensi->tanggal->toDateString(), $absensi->jam_masuk, $absensi->jam_keluar, $absensi->status,
         ]);
-        $this->get(route('guru.absensi.index'))->assertSee('1j 35m');
+        $this->get(route('guru.kelas.index'))->assertSee('1j 35m');
     }
 
     public function test_masuk_kelas_melewati_toleransi_ditandai_terlambat(): void

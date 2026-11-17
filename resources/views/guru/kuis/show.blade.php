@@ -54,15 +54,15 @@
                 </div>
 
                 <div class="card card-body space-y-3">
-                    <h3 class="card-title">Import Soal dari Excel</h3>
-                    <p class="text-xs text-slate-500">Kolom: tipe (pg/esai), pertanyaan, opsi_a–opsi_d, kunci_jawaban (a/b/c/d), bobot.</p>
-                    <a href="{{ route('guru.soal.template') }}" class="btn-secondary btn-sm w-full"><x-icon name="download" class="h-3.5 w-3.5" /> Unduh template</a>
+                    <h3 class="card-title">Import Soal dari Word</h3>
+                    <p class="text-xs text-slate-500">File format Microsoft Word (.docx). Tabel kolom: No, Tipe (pg/esai), Pertanyaan, Opsi A–D, Kunci (A/B/C/D), Bobot.</p>
+                    <a href="{{ route('guru.soal.template') }}" class="btn-secondary btn-sm w-full"><x-icon name="download" class="h-3.5 w-3.5" /> Unduh template Word</a>
                     <form method="POST" action="{{ route('guru.soal.import', [$pengampu, $kuis]) }}" enctype="multipart/form-data" class="space-y-2">
                         @csrf
-                        <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                        <input type="file" name="file" accept=".docx" required
                                class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-700">
                         @error('file') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
-                        <button type="submit" class="btn-primary btn-sm w-full"><x-icon name="upload" class="h-3.5 w-3.5" /> Import</button>
+                        <button type="submit" class="btn-primary btn-sm w-full"><x-icon name="upload" class="h-3.5 w-3.5" /> Import Soal</button>
                     </form>
                     @if (session('gagal_import'))
                         <div class="rounded-lg bg-red-50 p-3 text-xs text-red-700">
@@ -121,7 +121,7 @@
                         </div>
                     </li>
                 @empty
-                    <li class="py-8 text-center text-sm text-slate-500">Belum ada soal. Tambahkan manual atau import dari Excel.</li>
+                    <li class="py-8 text-center text-sm text-slate-500">Belum ada soal. Tambahkan manual atau import dari Word.</li>
                 @endforelse
             </ol>
         </div>

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AbsensiGuru;
 use App\Models\Guru;
 use App\Models\Jadwal;
+use App\Models\Presensi;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -128,15 +129,31 @@ class AbsensiGuruService
         }
 
         $absensi = AbsensiGuru::whereDate('tanggal', $tanggal)->get()->keyBy('jadwal_id');
+        $presensi = Presensi::whereDate('tanggal', $tanggal)
+            ->selectRaw('pengampu_id, MAX(materi) as materi, MAX(tugas) as tugas, MAX(catatan) as catatan, MAX(dokumentasi) as dokumentasi')
+            ->groupBy('pengampu_id')
+            ->get()
+            ->keyBy('pengampu_id');
 
         return $this->queryJadwal($cari)
             ->where('hari', $hari)
             ->get()
-            ->map(function (Jadwal $j) use ($absensi, $tanggal) {
+            ->map(function (Jadwal $j) use ($absensi, $presensi, $tanggal) {
                 $a = $absensi->get($j->id);
+                $p = $presensi->get($j->pengampu_id);
+                $materi = $a?->materi ?: $p?->materi;
+                $tugas = $a?->aktivitas ?: $p?->tugas;
+                $dokumentasi = $a?->dokumentasi ?: $p?->dokumentasi;
                 $berakhir = Carbon::parse($tanggal->toDateString().' '.$j->jam_selesai)->isPast();
 
-                return ['jadwal' => $j, 'absensi' => $a, 'status' => $a?->status ?? ($berakhir ? 'tidak_hadir' : 'belum')];
+                return [
+                    'jadwal' => $j,
+                    'absensi' => $a,
+                    'materi' => $materi,
+                    'tugas' => $tugas,
+                    'dokumentasi' => $dokumentasi,
+                    'status' => $a?->status ?? ($berakhir ? 'tidak_hadir' : 'belum'),
+                ];
             });
     }
 

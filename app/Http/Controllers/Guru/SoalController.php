@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Guru;
 
-use App\Exports\TemplateExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Guru\SoalRequest;
 use App\Imports\SoalImport;
@@ -13,7 +12,6 @@ use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SoalController extends Controller
@@ -75,7 +73,11 @@ class SoalController extends Controller
 
     public function template(): BinaryFileResponse
     {
-        return Excel::download(new TemplateExport(SoalImport::kolom(), SoalImport::contoh()), 'template_import_soal.xlsx');
+        $path = SoalImport::buatTemplateDocx();
+
+        return response()->download($path, 'template_import_soal.docx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
     }
 
     public function import(Request $request, Pengampu $pengampu, Kuis $kuis): RedirectResponse
@@ -84,10 +86,12 @@ class SoalController extends Controller
             return $this->tolakTerkunci($pengampu, $kuis);
         }
 
-        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:5120']], [], ['file' => 'file Excel']);
+        $request->validate([
+            'file' => ['required', 'file', 'extensions:docx', 'max:10240'],
+        ], [], ['file' => 'file Word (.docx)']);
 
         $import = new SoalImport($kuis);
-        Excel::import($import, $request->file('file'));
+        $import->import($request->file('file'));
 
         ActivityLogger::log('import_soal', "Import soal \"{$kuis->judul}\": {$import->berhasil} berhasil, ".count($import->gagal).' gagal');
 

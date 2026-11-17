@@ -1,7 +1,6 @@
 <x-layouts.app title="Dashboard">
     <x-banner-sapaan :nama="auth()->user()->nama" pesan="Semangat mengajar! Berikut ringkasan kelas Anda hari ini.">
-        <a href="{{ route('guru.kelas.index') }}" class="btn-primary"><x-icon name="book" class="h-4 w-4" /> Kelas Ajar</a>
-        <a href="{{ route('guru.absensi.index') }}" class="btn-secondary"><x-icon name="clock" class="h-4 w-4" /> Absensi</a>
+        <a href="{{ route('guru.kelas.index') }}" class="btn-primary"><x-icon name="book" class="h-4 w-4" /> Kelas & Absensi Mengajar</a>
         @if ($kelasWali)
             <a href="{{ route('guru.wali.rekap') }}" class="btn-secondary"><x-icon name="star" class="h-4 w-4" /> Wali {{ $kelasWali->nama_kelas }}</a>
         @endif

@@ -122,12 +122,33 @@
         <div class="card-header"><h3 class="card-title">Riwayat Kehadiran</h3></div>
         <ul class="divide-y divide-slate-100 px-4 pb-3 sm:px-6">
             @forelse ($riwayat as $p)
-                <li class="flex items-center justify-between gap-3 py-3">
-                    <div class="min-w-0">
+                <li class="flex items-start justify-between gap-3 py-3">
+                    <div class="min-w-0 space-y-1">
                         <div class="truncate text-sm font-semibold text-slate-800">{{ $p->pengampu->mapel->nama_mapel }}</div>
                         <div class="text-xs text-slate-500">
                             Pertemuan {{ $p->pertemuan_ke }} · {{ tanggal_indo($p->tanggal, false) }}
                         </div>
+                        @if ($p->materi)
+                            <div class="text-xs text-slate-700">
+                                <span class="font-semibold text-blue-700">Materi:</span> {{ $p->materi }}
+                            </div>
+                        @endif
+                        @if ($p->tugas)
+                            <div class="text-xs text-slate-600">
+                                <span class="font-semibold text-amber-700">Tugas:</span> {{ $p->tugas }}
+                            </div>
+                        @endif
+                        @if ($p->catatan)
+                            <div class="text-[11px] text-slate-400 italic">"{{ $p->catatan }}"</div>
+                        @endif
+                        @if ($p->dokumentasi)
+                            <div class="mt-1">
+                                <a href="{{ file_url($p->dokumentasi) }}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-700 hover:underline">
+                                    <x-icon name="photo" class="h-3.5 w-3.5" />
+                                    <span>Bukti Foto Pembelajaran</span>
+                                </a>
+                            </div>
+                        @endif
                     </div>
                     <div class="shrink-0">
                         @php

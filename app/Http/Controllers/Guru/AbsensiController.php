@@ -8,27 +8,15 @@ use App\Models\Jadwal;
 use App\Services\AbsensiGuruService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 /** Absen masuk & keluar kelas sesuai jadwal mengajar hari ini, beserta riwayat bulan berjalan. */
 class AbsensiController extends Controller
 {
     public function __construct(private AbsensiGuruService $service) {}
 
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
-        $guru = $request->user()->guru;
-
-        return view('guru.absensi', [
-            'jadwalHariIni' => $this->service->jadwalHariIni($guru),
-            'riwayat' => $guru->absensi()
-                ->with(['jadwal.pengampu.kelas', 'jadwal.pengampu.mapel'])
-                ->whereBetween('tanggal', [now()->startOfMonth()->toDateString(), today()->toDateString()])
-                ->latest('tanggal')
-                ->latest('jam_masuk')
-                ->get(),
-            'toleransi' => $this->service->toleransi(),
-        ]);
+        return redirect()->route('guru.kelas.index');
     }
 
     public function masuk(Request $request, Jadwal $jadwal): RedirectResponse

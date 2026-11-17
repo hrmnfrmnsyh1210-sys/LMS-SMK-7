@@ -16,6 +16,9 @@ class Presensi extends Model
         'pertemuan_ke',
         'status',
         'catatan',
+        'materi',
+        'tugas',
+        'dokumentasi',
         'diabsen_oleh',
         'waktu_absen',
     ];

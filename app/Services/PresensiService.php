@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AbsensiGuru;
+use App\Models\Jadwal;
 use App\Models\Pengampu;
 use App\Models\Presensi;
 use App\Models\Siswa;
@@ -42,12 +44,12 @@ class PresensiService
      *
      * @param  array<int|string, string>  $status  siswa_id => status
      */
-    public function simpan(Pengampu $pengampu, int $pertemuan, string $tanggal, array $status, ?string $catatan = null): void
+    public function simpan(Pengampu $pengampu, int $pertemuan, string $tanggal, array $status, ?string $catatan = null, ?string $materi = null, ?string $tugas = null, ?string $dokumentasi = null): void
     {
         $siswaValid = $pengampu->daftarSiswa()->pluck('id')->all();
         $statusLama = Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->pluck('status', 'siswa_id');
 
-        DB::transaction(function () use ($pengampu, $pertemuan, $tanggal, $status, $siswaValid, $catatan) {
+        DB::transaction(function () use ($pengampu, $pertemuan, $tanggal, $status, $siswaValid, $catatan, $materi, $tugas, $dokumentasi) {
             foreach ($status as $siswaId => $nilai) {
                 if (! in_array((int) $siswaId, $siswaValid, true)) {
                     continue;
@@ -59,11 +61,41 @@ class PresensiService
                 );
             }
 
-            // Tanggal dan catatan pertemuan disamakan untuk semua siswa.
-            Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->update([
+            // Tanggal, catatan, materi, tugas, dan bukti dokumentasi pertemuan disamakan untuk semua siswa.
+            $updateData = [
                 'tanggal' => $tanggal,
                 'catatan' => $catatan,
-            ]);
+                'materi' => $materi,
+                'tugas' => $tugas,
+            ];
+
+            if ($dokumentasi !== null) {
+                $updateData['dokumentasi'] = $dokumentasi ?: null;
+            }
+
+            Presensi::where('pengampu_id', $pengampu->id)->where('pertemuan_ke', $pertemuan)->update($updateData);
+
+            // Sinkronkan ke jurnal mengajar guru (AbsensiGuru) jika ada jadwal pada hari dan tanggal tersebut.
+            if ($materi || $tugas || $dokumentasi) {
+                $hari = Jadwal::hariDari(Carbon::parse($tanggal));
+                if ($hari) {
+                    $jadwalIds = $pengampu->jadwal()->where('hari', $hari)->pluck('id');
+                    if ($jadwalIds->isNotEmpty()) {
+                        $updateAbsensi = array_filter([
+                            'materi' => $materi,
+                            'aktivitas' => $tugas,
+                            'dokumentasi' => $dokumentasi ?: null,
+                        ], fn ($v) => $v !== null);
+
+                        if ($updateAbsensi) {
+                            AbsensiGuru::where('guru_id', $pengampu->guru_id)
+                                ->whereIn('jadwal_id', $jadwalIds)
+                                ->whereDate('tanggal', $tanggal)
+                                ->update($updateAbsensi);
+                        }
+                    }
+                }
+            }
         });
 
         $baruAlpa = collect($status)
@@ -101,11 +133,63 @@ class PresensiService
     public function daftarPertemuan(Pengampu $pengampu): Collection
     {
         return Presensi::where('pengampu_id', $pengampu->id)
-            ->selectRaw('pertemuan_ke, MIN(tanggal) as tanggal, MAX(catatan) as catatan')
+            ->selectRaw('pertemuan_ke, MIN(tanggal) as tanggal, MAX(catatan) as catatan, MAX(materi) as materi, MAX(tugas) as tugas, MAX(dokumentasi) as dokumentasi')
             ->selectRaw("SUM(status = 'hadir') as hadir, SUM(status = 'izin') as izin, SUM(status = 'sakit') as sakit, SUM(status = 'alpa') as alpa")
             ->groupBy('pertemuan_ke')
             ->orderBy('pertemuan_ke')
             ->get();
+    }
+
+    /**
+     * Memeriksa apakah sesi presensi untuk pengampu hari ini sudah dibuka oleh guru.
+     * Sesi terbuka bila guru sudah absen masuk kelas pada jadwal hari ini (dan belum keluar),
+     * atau bila guru sudah mengisi/membuka data presensi hari ini.
+     */
+    public function isSesiPresensiTerbuka(Pengampu $pengampu, ?string $tanggal = null): bool
+    {
+        $tanggal = $tanggal ?? today()->toDateString();
+
+        $absensiGuru = AbsensiGuru::whereHas('jadwal', fn ($q) => $q->where('pengampu_id', $pengampu->id))
+            ->whereDate('tanggal', $tanggal)
+            ->latest('jam_masuk')
+            ->first();
+
+        if ($absensiGuru) {
+            return $absensiGuru->jam_masuk !== null && $absensiGuru->jam_keluar === null;
+        }
+
+        return Presensi::where('pengampu_id', $pengampu->id)
+            ->whereDate('tanggal', $tanggal)
+            ->exists();
+    }
+
+    /**
+     * Mengembalikan koleksi ID pengampu yang sesi presensinya sedang terbuka hari ini.
+     *
+     * @param  iterable<int>  $pengampuIds
+     * @return Collection<int, int>
+     */
+    public function daftarSesiTerbuka(iterable $pengampuIds, ?string $tanggal = null): Collection
+    {
+        $tanggal = $tanggal ?? today()->toDateString();
+
+        $terbuka = collect();
+        foreach ($pengampuIds as $id) {
+            $absensiGuru = AbsensiGuru::whereHas('jadwal', fn ($q) => $q->where('pengampu_id', $id))
+                ->whereDate('tanggal', $tanggal)
+                ->latest('jam_masuk')
+                ->first();
+
+            if ($absensiGuru) {
+                if ($absensiGuru->jam_masuk !== null && $absensiGuru->jam_keluar === null) {
+                    $terbuka->push((int) $id);
+                }
+            } elseif (Presensi::where('pengampu_id', $id)->whereDate('tanggal', $tanggal)->exists()) {
+                $terbuka->push((int) $id);
+            }
+        }
+
+        return $terbuka->unique()->values();
     }
 
     public function absenMandiri(Siswa $siswa, Pengampu $pengampu, string $status = 'hadir', ?string $catatan = null): Presensi
@@ -114,6 +198,12 @@ class PresensiService
 
         if (! in_array($status, ['hadir', 'izin', 'sakit'], true)) {
             throw ValidationException::withMessages(['status' => 'Status presensi tidak valid.']);
+        }
+
+        if (! $this->isSesiPresensiTerbuka($pengampu)) {
+            throw ValidationException::withMessages([
+                'presensi' => 'Presensi belum dibuka oleh guru. Anda baru dapat presensi setelah guru melakukan absen masuk kelas.',
+            ]);
         }
 
         $sudah = Presensi::where('pengampu_id', $pengampu->id)

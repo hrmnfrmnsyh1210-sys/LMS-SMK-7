@@ -8,9 +8,6 @@ use App\Models\Soal;
 use App\Services\KuisService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use PhpOffice\PhpSpreadsheet\Cell\DataType;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Tests\TestCase;
 
 class KuisTest extends TestCase
@@ -54,32 +51,67 @@ class KuisTest extends TestCase
         $this->assertNull($esai->kunci_jawaban);
     }
 
-    public function test_import_soal_dari_excel(): void
+    public function test_import_soal_dari_word(): void
     {
         [$pengampu] = $this->kelasAjar();
         $kuis = Kuis::factory()->create(['pengampu_id' => $pengampu->id]);
 
-        $sheet = new Spreadsheet;
-        $baris = [
-            ['tipe', 'pertanyaan', 'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'kunci_jawaban', 'bobot'],
-            ['pg', '1 + 1 = ...', '1', '2', '3', '4', 'B', '2'],
-            ['esai', 'Jelaskan fotosintesis', '', '', '', '', '', '5'],
-            ['pg', 'Tanpa kunci', 'a', 'b', 'c', 'd', '', '1'],
-        ];
-        foreach ($baris as $r => $kolom) {
-            foreach ($kolom as $c => $nilai) {
-                $sheet->getActiveSheet()->setCellValueExplicit([$c + 1, $r + 1], $nilai, DataType::TYPE_STRING);
-            }
-        }
-        $path = tempnam(sys_get_temp_dir(), 'soal').'.xlsx';
-        (new Xlsx($sheet))->save($path);
+        $path = tempnam(sys_get_temp_dir(), 'soal').'.docx';
+        $this->buatDocxSoal($path, [
+            ['No', 'Tipe (pg/esai)', 'Pertanyaan', 'Opsi A', 'Opsi B', 'Opsi C', 'Opsi D', 'Kunci (A/B/C/D)', 'Bobot'],
+            ['1', 'pg', '1 + 1 = ...', '1', '2', '3', '4', 'B', '2'],
+            ['2', 'esai', 'Jelaskan fotosintesis', '', '', '', '', '', '5'],
+            ['3', 'pg', 'Tanpa kunci', 'a', 'b', 'c', 'd', '', '1'],
+        ]);
 
-        $this->post(route('guru.soal.import', [$pengampu, $kuis]), ['file' => new UploadedFile($path, 'soal.xlsx', null, null, true)])
+        $this->post(route('guru.soal.import', [$pengampu, $kuis]), [
+            'file' => new UploadedFile($path, 'soal.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', null, true),
+        ])
             ->assertSessionHas('success', '2 soal berhasil diimpor.')
             ->assertSessionHas('gagal_import', fn ($gagal) => $gagal[0]['baris'] === 4);
 
         $this->assertSame('b', $kuis->soal()->where('tipe', 'pg')->value('kunci_jawaban'));
         $this->assertSame(7, (int) $kuis->soal()->sum('bobot'));
+    }
+
+    private function buatDocxSoal(string $path, array $rows): void
+    {
+        $zip = new \ZipArchive;
+        $zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        $tblXml = '<w:tbl>';
+        foreach ($rows as $row) {
+            $tblXml .= '<w:tr>';
+            foreach ($row as $cell) {
+                $tblXml .= '<w:tc><w:p><w:r><w:t>'.htmlspecialchars((string) $cell, ENT_XML1).'</w:t></w:r></w:p></w:tc>';
+            }
+            $tblXml .= '</w:tr>';
+        }
+        $tblXml .= '</w:tbl>';
+
+        $docXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            .'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+            .'<w:body>'.$tblXml.'</w:body>'
+            .'</w:document>';
+
+        $zip->addFromString(
+            '[Content_Types].xml',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                .'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+                .'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+                .'<Default Extension="xml" ContentType="application/xml"/>'
+                .'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+                .'</Types>'
+        );
+        $zip->addFromString(
+            '_rels/.rels',
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                .'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                .'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+                .'</Relationships>'
+        );
+        $zip->addFromString('word/document.xml', $docXml);
+        $zip->close();
     }
 
     public function test_soal_terkunci_setelah_ada_siswa_mengerjakan(): void

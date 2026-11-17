@@ -8,6 +8,7 @@ use App\Models\Pengumuman;
 use App\Models\Presensi;
 use App\Models\Tugas;
 use App\Services\AkademikSiswaService;
+use App\Services\PresensiService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -15,7 +16,7 @@ class DashboardController extends Controller
 {
     public const HARI = [1 => 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-    public function __invoke(Request $request, AkademikSiswaService $akademik): View
+    public function __invoke(Request $request, AkademikSiswaService $akademik, PresensiService $presensiService): View
     {
         $user = $request->user();
         $siswa = $user->siswa;
@@ -40,12 +41,15 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('pengampu_id');
 
+        $sesiTerbukaPengampuIds = $presensiService->daftarSesiTerbuka($pengampuIds);
+
         return view('siswa.dashboard', [
             'user' => $user,
             'siswa' => $siswa,
             'kelas' => $kelas,
             'jadwalHariIni' => $jadwalHariIni,
             'presensiHariIni' => $presensiHariIni,
+            'sesiTerbukaPengampuIds' => $sesiTerbukaPengampuIds,
             'tugasMendatang' => $akademik->tugasBelumQuery($siswa, $pengampuIds)->limit(5)->get(),
             'kuisAktif' => $akademik->kuisAktifQuery($siswa, $pengampuIds)->limit(4)->get(),
             'statistik' => $akademik->ringkasan($siswa),

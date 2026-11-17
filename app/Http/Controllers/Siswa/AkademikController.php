@@ -7,43 +7,50 @@ use App\Models\Jadwal;
 use App\Models\Pengumuman;
 use App\Models\Presensi;
 use App\Services\AkademikSiswaService;
+use App\Services\PresensiService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /** Halaman baca-saja siswa: jadwal, presensi, nilai, dan pengumuman. */
 class AkademikController extends Controller
 {
-    public function __construct(private AkademikSiswaService $akademik) {}
+    public function __construct(
+        private AkademikSiswaService $akademik,
+        private PresensiService $presensiService,
+    ) {}
 
     public function jadwal(Request $request): View
-    {
-        $siswa = $request->user()->siswa;
-
-        return view('siswa.jadwal', ['jadwal' => $this->akademik->jadwal($siswa), 'kelas' => $siswa->kelasPada()]);
-    }
-
-    public function presensi(Request $request): View
     {
         $siswa = $request->user()->siswa;
         $pengampuIds = $siswa->pengampu()->pluck('id');
         $hariIni = Jadwal::hariDari(today());
 
-        $jadwalHariIni = $hariIni ? Jadwal::with(['pengampu.mapel', 'pengampu.guru'])
-            ->whereIn('pengampu_id', $pengampuIds)
-            ->where('hari', $hariIni)
-            ->orderBy('jam_mulai')
-            ->get() : collect();
-
+        // Presensi hari ini untuk tombol absen mandiri per mata pelajaran.
         $presensiHariIni = Presensi::where('siswa_id', $siswa->id)
             ->whereIn('pengampu_id', $pengampuIds)
             ->whereDate('tanggal', today())
             ->get()
             ->keyBy('pengampu_id');
 
-        return view('siswa.presensi', $this->akademik->presensi($siswa) + [
-            'jadwalHariIni' => $jadwalHariIni,
-            'presensiHariIni' => $presensiHariIni,
-        ]);
+        $sesiTerbukaPengampuIds = $this->presensiService->daftarSesiTerbuka($pengampuIds);
+
+        return view('siswa.jadwal', array_merge(
+            [
+                'jadwal' => $this->akademik->jadwal($siswa),
+                'kelas' => $siswa->kelasPada(),
+                'hariIni' => $hariIni,
+                'presensiHariIni' => $presensiHariIni,
+                'sesiTerbukaPengampuIds' => $sesiTerbukaPengampuIds,
+            ],
+            $this->akademik->presensi($siswa),
+        ));
+    }
+
+    public function presensi(Request $request): RedirectResponse
+    {
+        // Jadwal dan presensi digabung di halaman jadwal.
+        return redirect()->route('siswa.jadwal');
     }
 
     public function nilai(Request $request): View

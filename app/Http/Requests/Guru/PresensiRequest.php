@@ -21,6 +21,10 @@ class PresensiRequest extends FormRequest
             'status' => ['required', 'array'],
             'status.*' => ['required', Rule::in(array_keys(PresensiService::STATUS))],
             'catatan' => ['nullable', 'string', 'max:1000'],
+            'materi' => ['nullable', 'string', 'max:1000'],
+            'tugas' => ['nullable', 'string', 'max:1000'],
+            'dokumentasi' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+            'hapus_dokumentasi' => ['nullable', 'boolean'],
         ];
     }
 
